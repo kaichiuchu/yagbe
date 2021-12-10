@@ -16,7 +16,12 @@ open an issue and it will be investigated.
 
 ## Building
 
-TODO
+yagbe tries to support all of the known compilers.
+
+There are many ways to build yagbe, this is entirely dependent on your
+environment.
+
+If you wish to use CMake, it must be between versions 3.7 and 3.22.
 
 ## Credits
 
