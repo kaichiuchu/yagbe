@@ -43,6 +43,33 @@ uint8_t libyagbe_bus_read_memory(struct libyagbe_bus* const bus,
     case 0xD:
       return bus->wram[address - 0xD000];
 
+    case 0xF:
+      switch ((address >> 8) & 0x0F) {
+        case 0xF:
+          switch ((address & 0x00FF) >> 4) {
+            case 0x4:
+              switch (address & 0x000F) {
+                case LIBYAGBE_PPU_IO_LY:
+                  return bus->ppu.ly;
+
+                default:
+                  printf("Unhandled read: $%04X\n", address);
+                  return 0xFF;
+              }
+
+            case 0x8:
+              return bus->hram[address - 0xFF80];
+
+            default:
+              printf("Unhandled read: $%04X\n", address);
+              return 0xFF;
+          }
+
+        default:
+          printf("Unhandled read: $%04X\n", address);
+          return 0xFF;
+      }
+
     default:
       printf("Unhandled read: $%04X\n", address);
       return 0xFF;
@@ -54,6 +81,11 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
   assert(bus != NULL);
 
   switch (address >> 12) {
+    case 0x8:
+    case 0x9:
+      bus->ppu.vram[address - 0x8000] = data;
+      return;
+
     case 0xC:
       bus->wram[address - 0xC000] = data;
       return;
@@ -68,6 +100,13 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
           switch ((address & 0x00FF) >> 4) {
             case 0x0:
               switch (address & 0x000F) {
+                case 1:
+                  putchar(data);
+                  return;
+
+                case 2:
+                  return;
+
                 case LIBYAGBE_TIMER_IO_TAC:
                   bus->timer.tac = data;
                   return;
@@ -77,11 +116,14 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
                   return;
 
                 default:
-                  break;
+                  printf("Unhandled write: $%04X <- $%02X\n", address, data);
+                  return;
               }
-              break;
 
             case 0x1:
+              printf("Unhandled write: $%04X <- $%02X\n", address, data);
+              return;
+
             case 0x2:
               switch (address & 0x000F) {
                 case LIBYAGBE_APU_IO_NR50:
@@ -97,16 +139,42 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
                   return;
 
                 default:
-                  break;
+                  printf("Unhandled write: $%04X <- $%02X\n", address, data);
+                  return;
               }
-              break;
 
             case 0x3:
+              printf("Unhandled write: $%04X <- $%02X\n", address, data);
+              return;
+
             case 0x4:
+              switch (address & 0x000F) {
+                case LIBYAGBE_PPU_IO_LCDC:
+                  bus->ppu.lcdc = data;
+                  return;
+
+                case LIBYAGBE_PPU_IO_SCY:
+                  bus->ppu.scy = data;
+                  return;
+
+                case LIBYAGBE_PPU_IO_SCX:
+                  bus->ppu.scx = data;
+                  return;
+
+                case LIBYAGBE_PPU_IO_BGP:
+                  bus->ppu.bgp = data;
+                  return;
+
+                default:
+                  printf("Unhandled write: $%04X <- $%02X\n", address, data);
+                  return;
+              }
+
             case 0x5:
             case 0x6:
             case 0x7:
-              break;
+              printf("Unhandled write: $%04X <- $%02X\n", address, data);
+              return;
 
             case 0x8:
             case 0x9:
@@ -120,6 +188,7 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
 
             case 0xF:
               switch (address & 0x000F) {
+                case 0x0:
                 case 0x1:
                 case 0x2:
                 case 0x3:
@@ -141,19 +210,23 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
                   return;
 
                 default:
-                  break;
+                  printf("Unhandled write: $%04X <- $%02X\n", address, data);
+                  return;
               }
-              break;
+
+            default:
+              printf("Unhandled write: $%04X <- $%02X\n", address, data);
+              return;
           }
-          break;
 
         default:
-          break;
+          printf("Unhandled write: $%04X <- $%02X\n", address, data);
+          return;
       }
-      break;
 
     default:
-      break;
+      printf("Unhandled write: $%04X <- $%02X\n", address, data);
+      return;
   }
   printf("Unhandled write: $%04X <- $%02X\n", address, data);
 }

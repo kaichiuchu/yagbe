@@ -16,4 +16,29 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "libyagbe/apu.h"
+#ifndef LIBYAGBE_PPU_H
+#define LIBYAGBE_PPU_H
+
+#include "compat/compat_stdint.h"
+
+enum libyagbe_ppu_io_registers {
+  LIBYAGBE_PPU_IO_LCDC = 0x0,
+  LIBYAGBE_PPU_IO_SCY = 0x2,
+  LIBYAGBE_PPU_IO_SCX = 0x3,
+  LIBYAGBE_PPU_IO_LY = 0x4,
+  LIBYAGBE_PPU_IO_BGP = 0x7
+};
+
+enum libyagbe_ppu_mem_size { LIBYAGBE_PPU_MEM_SIZE_VRAM = 8192 };
+
+struct libyagbe_ppu {
+  uint8_t lcdc;
+  uint8_t scy;
+  uint8_t scx;
+  uint8_t ly;
+  uint8_t bgp;
+
+  uint8_t vram[LIBYAGBE_PPU_MEM_SIZE_VRAM];
+};
+
+#endif /* LIBYAGBE_PPU_H */

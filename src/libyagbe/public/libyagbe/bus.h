@@ -21,6 +21,7 @@
 
 #include "apu.h"
 #include "cart.h"
+#include "ppu.h"
 #include "timer.h"
 
 enum libyagbe_bus_memory_size {
@@ -45,6 +46,7 @@ struct libyagbe_bus {
   struct libyagbe_apu apu;
   struct libyagbe_cart cart;
   struct libyagbe_timer timer;
+  struct libyagbe_ppu ppu;
 
   uint8_t wram[LIBYAGBE_BUS_MEM_SIZE_WRAM];
   uint8_t hram[LIBYAGBE_BUS_MEM_SIZE_HRAM];

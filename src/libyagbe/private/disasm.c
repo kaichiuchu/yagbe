@@ -89,7 +89,7 @@ static const struct disasm_data main_opcodes[256] = {
     {"INC E", OP_NONE, REG_E | REG_F},          // 0x1C
     {"DEC E", OP_NONE, REG_E},                  // 0x1D
     {"LD E, $%02X", OP_IMM8, REG_E},            // 0x1E
-    {"RRA", OP_NONE, REG_UNUSED},               // 0x1F
+    {"RRA", OP_NONE, REG_A | REG_F},            // 0x1F
     {"JR NZ, $%04X", OP_SIMM8, REG_UNUSED},     // 0x20
     {"LD HL, $%04X", OP_IMM16, REG_HL},         // 0x21
     {"LDI (HL), A", OP_NONE, REG_HL},           // 0x22

@@ -16,4 +16,4 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "libyagbe/apu.h"
+#include "libyagbe/ppu.h"

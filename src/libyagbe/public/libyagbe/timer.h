@@ -23,9 +23,9 @@
 extern "C" {
 #endif /* __cplusplus */
 
-enum libyagbe_timer_io_registers {
-  LIBYAGBE_TIMER_IO_TAC = 0x7,
-};
+#include "compat/compat_stdint.h"
+
+enum libyagbe_timer_io_registers { LIBYAGBE_TIMER_IO_TAC = 0x7 };
 
 struct libyagbe_timer {
   uint8_t tac;

@@ -72,16 +72,18 @@ int main(int argc, char* argv[]) {
   libyagbe_system_init(&gb, rom_data);
 
   for (;;) {
+    const uint16_t pc = gb.cpu.reg.pc;
+
     libyagbe_disasm_prepare(gb.cpu.reg.pc, &gb.bus);
 
     if (libyagbe_system_step(&gb) == 0) {
       disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
-      printf("$%04X: %s\n", gb.cpu.reg.pc, disasm);
+      printf("$%04X: %s\n", pc, disasm);
 
       return EXIT_FAILURE;
     }
 
     disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
-    printf("$%04X: %s\n", gb.cpu.reg.pc, disasm);
+    printf("$%04X: %s\n", pc, disasm);
   }
 }
