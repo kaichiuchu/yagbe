@@ -2092,6 +2092,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         call_if(cpu, bus, (cpu->reg.af.byte.lo & FLAG_C) != 0);
         return;
 
+      case OP_SBC_A_IMM8: {
+        const uint8_t imm = read_imm8(cpu, bus);
+
+        alu_sub(cpu, imm, ALU_WITH_CARRY);
+        return;
+      }
+
       case OP_RST_18:
         rst(cpu, bus, 0x0018);
         return;
