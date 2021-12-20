@@ -27,31 +27,34 @@ extern "C" {
 
 struct libyagbe_bus;
 
-/** Defines the flag bits for the Flag register. */
-enum libyagbe_cpu_flag {
-  /** This bit is set if and only if the result of an operation is zero. Used by
-     conditional jumps. */
-  LIBYAGBE_CPU_FLAG_Z = (1 << 7),
+/* XXX: On older compilers, though I seriously doubt it, this may be dangerous.
+*  Need to investigate.
+*
+*  Maybe we can come up with some sort of abstraction layer, e.g. use anonymous
+*  structs/unions if the standard is >=C11 or else fall back to this? How would
+*  we handle accesses and declarations cleanly among standards?
+*/
+typedef union _cpu_register_pair {
+  uint16_t value;
 
-  /** This bit is set in these cases:
-   *
-   * When the result of an 8-bit addition is higher than $FF.
-   * When the result of a 16-bit addition is higher than $FFFF.
-   * When the result of a subtraction or comparison is lower than zero (like in
-   * Z80 and 80x86 CPUs, but unlike in 65XX and ARM CPUs). When a rotate/shift
-   * operation shifts out a “1” bit.
-   *
-   * Used by conditional jumps and instructions such as ADC, SBC, RL, RLA, etc.
-   */
-  LIBYAGBE_CPU_FLAG_N = (1 << 6),
-  LIBYAGBE_CPU_FLAG_H = (1 << 5),
-  LIBYAGBE_CPU_FLAG_C = (1 << 4)
-};
+  struct {
+#ifdef BIG_ENDIAN
+    uint8_t hi;
+    uint8_t lo;
+#else
+    uint8_t lo;
+    uint8_t hi;
+#endif /* BIG_ENDIAN */
+  } byte;
+} cpu_register_pair;
 
 /* Defines the structure of an SM83 CPU. */
 struct libyagbe_cpu {
   struct libyagbe_cpu_registers {
-    uint8_t b, c, d, e, f, h, l, a;
+    cpu_register_pair af;
+    cpu_register_pair bc;
+    cpu_register_pair de;
+    cpu_register_pair hl;
 
     uint16_t pc;
     uint16_t sp;
@@ -71,8 +74,8 @@ void libyagbe_cpu_reset(struct libyagbe_cpu* const cpu);
  *
  * @param cpu The SM83 CPU instance.
  */
-unsigned int libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
-                               struct libyagbe_bus* const bus);
+void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
+                       struct libyagbe_bus* const bus);
 
 #ifdef __cplusplus
 }

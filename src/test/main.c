@@ -26,7 +26,7 @@
 
 static uint8_t* open_rom(const char* const file) {
   FILE* const rom_file = fopen(file, "rb");
-  size_t rom_file_size;
+  long rom_file_size;
   uint8_t* data;
 
   if (rom_file == NULL) {
@@ -40,17 +40,16 @@ static uint8_t* open_rom(const char* const file) {
   }
 
   rom_file_size = ftell(rom_file);
-
   fseek(rom_file, 0, SEEK_SET);
 
-  data = malloc(sizeof(uint8_t) * rom_file_size);
+  data = malloc(sizeof(uint8_t) * (size_t)rom_file_size);
 
   if (data == NULL) {
     fprintf(stderr, "malloc() failed: %s\n", strerror(errno));
     exit(EXIT_FAILURE);
   }
 
-  fread(data, sizeof(uint8_t), rom_file_size, rom_file);
+  fread(data, sizeof(uint8_t), (size_t)rom_file_size, rom_file);
 
   fclose(rom_file);
   return data;
@@ -72,18 +71,18 @@ int main(int argc, char* argv[]) {
   libyagbe_system_init(&gb, rom_data);
 
   for (;;) {
-    const uint16_t pc = gb.cpu.reg.pc;
+    //const uint16_t pc = gb.cpu.reg.pc;
 
     libyagbe_disasm_prepare(gb.cpu.reg.pc, &gb.bus);
 
     if (libyagbe_system_step(&gb) == 0) {
       disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
-      printf("$%04X: %s\n", pc, disasm);
+      //printf("$%04X: %s\n", pc, disasm);
 
       return EXIT_FAILURE;
     }
 
     disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
-    printf("$%04X: %s\n", pc, disasm);
+    //printf("$%04X: %s\n", pc, disasm);
   }
 }

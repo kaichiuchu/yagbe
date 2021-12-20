@@ -21,18 +21,19 @@ set(PRIVATE_SRCS private/apu.c
                  private/gb.c
                  private/timer.c)
 
+set(PRIVATE_HDRS private/utility.h)
+
 set(PUBLIC_HDRS public/libyagbe/compat/compat_stdbool.h
                 public/libyagbe/compat/compat_stdint.h
                 public/libyagbe/apu.h
                 public/libyagbe/bus.h
                 public/libyagbe/cart.h
-                public/libyagbe/cpu_defs.h
                 public/libyagbe/cpu.h
                 public/libyagbe/disasm.h
                 public/libyagbe/gb.h
                 public/libyagbe/ppu.h
                 public/libyagbe/timer.h)
 
-add_library(yagbecore STATIC ${PRIVATE_SRCS} ${PUBLIC_HDRS})
+add_library(yagbecore STATIC ${PRIVATE_SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS})
 target_include_directories(yagbecore PRIVATE public)
 yagbe_configure_c_target(yagbecore)

@@ -21,7 +21,7 @@ function(yagbe_configure_c_target TARGET_NAME)
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     if (CMAKE_C_COMPILER_ID MATCHES "Clang" OR
         CMAKE_C_COMPILER_ID MATCHES "GCC")
-      set(MAIN_COMPILER_FLAGS "-pedantic;-Wall;-Werror;-Wextra")
+      set(MAIN_COMPILER_FLAGS "-Wall;-Werror;-Wextra;-Wno-format-nonliteral")
     endif()
   endif()
 
@@ -36,4 +36,5 @@ function(yagbe_configure_c_target TARGET_NAME)
   endif()
 
   target_compile_options(${TARGET_NAME} PRIVATE ${MAIN_COMPILER_FLAGS})
+  target_compile_definitions(${TARGET_NAME} PRIVATE -D_CRT_SECURE_NO_WARNINGS)
 endfunction()

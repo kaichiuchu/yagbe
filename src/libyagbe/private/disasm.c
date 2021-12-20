@@ -24,7 +24,6 @@
 
 #include "libyagbe/bus.h"
 #include "libyagbe/cpu.h"
-#include "libyagbe/cpu_defs.h"
 
 /* Defines the registers that should be shown in the disassembly output *after*
  * the instruction has been executed. */
@@ -99,7 +98,7 @@ static const struct disasm_data main_opcodes[256] = {
     {"LD H, $%02X", OP_IMM8, REG_H},            // 0x26
     {"DAA", OP_NONE, REG_A},                    // 0x27
     {"JR Z, $%04X", OP_SIMM8, REG_UNUSED},      // 0x28
-    {"ADD HL, HL", OP_NONE, REG_UNUSED},        // 0x29
+    {"ADD HL, HL", OP_NONE, REG_HL | REG_F},    // 0x29
     {"LDI A, (HL)", OP_NONE, REG_A | REG_HL},   // 0x2A
     {"DEC HL", OP_NONE, REG_HL},                // 0x2B
     {"INC L", OP_NONE, REG_L},                  // 0x2C
@@ -112,7 +111,7 @@ static const struct disasm_data main_opcodes[256] = {
     {"INC SP", OP_NONE, REG_SP},                // 0x33
     {"INC (HL)", OP_NONE, REG_HL_MEM},          // 0x34
     {"DEC (HL)", OP_NONE, REG_HL_MEM},          // 0x35
-    {"LD (HL), $%02X", OP_NONE, REG_HL_MEM},    // 0x36
+    {"LD (HL), $%02X", OP_IMM8, REG_HL_MEM},    // 0x36
     {"SCF", OP_NONE, REG_UNUSED},               // 0x37
     {"JR C, $%04X", OP_SIMM8, REG_UNUSED},      // 0x38
     {"ADD HL, SP", OP_NONE, REG_UNUSED},        // 0x39
@@ -591,7 +590,7 @@ void libyagbe_disasm_prepare(const uint16_t pc,
 
   instruction = libyagbe_bus_read_memory(bus, pc);
 
-  if (instruction == LIBYAGBE_CPU_OP_PREFIX_CB) {
+  if (instruction == 0xCB) {
     instruction = libyagbe_bus_read_memory(bus, pc + 1);
     data = &cb_opcodes[instruction];
   } else {
@@ -651,51 +650,51 @@ char* libyagbe_disasm_execute(struct libyagbe_cpu* const cpu,
     if (counter & current_disasm.post_op_flags) {
       switch (counter) {
         case REG_B:
-          sprintf(buf, "B=$%02X", cpu->reg.b);
+          sprintf(buf, "B=$%02X", cpu->reg.bc.byte.hi);
           break;
 
         case REG_C:
-          sprintf(buf, "C=$%02X", cpu->reg.c);
+          sprintf(buf, "C=$%02X", cpu->reg.bc.byte.lo);
           break;
 
         case REG_D:
-          sprintf(buf, "D=$%02X", cpu->reg.d);
+          sprintf(buf, "D=$%02X", cpu->reg.de.byte.hi);
           break;
 
         case REG_E:
-          sprintf(buf, "E=$%02X", cpu->reg.e);
+          sprintf(buf, "E=$%02X", cpu->reg.de.byte.lo);
           break;
 
         case REG_F:
-          sprintf(buf, "F=$%02X", cpu->reg.f);
+          sprintf(buf, "F=$%02X", cpu->reg.af.byte.lo);
           break;
 
         case REG_H:
-          sprintf(buf, "H=$%02X", cpu->reg.h);
+          sprintf(buf, "H=$%02X", cpu->reg.hl.byte.hi);
           break;
 
         case REG_L:
-          sprintf(buf, "L=$%02X", cpu->reg.l);
+          sprintf(buf, "L=$%02X", cpu->reg.hl.byte.lo);
           break;
 
         case REG_A:
-          sprintf(buf, "A=$%02X", cpu->reg.a);
+          sprintf(buf, "A=$%02X", cpu->reg.af.byte.hi);
           break;
 
         case REG_BC:
-          sprintf(buf, "BC=$%04X", (cpu->reg.b << 8) | cpu->reg.c);
+          sprintf(buf, "BC=$%04X", cpu->reg.bc.value);
           break;
 
         case REG_DE:
-          sprintf(buf, "DE=$%04X", (cpu->reg.d << 8) | cpu->reg.e);
+          sprintf(buf, "DE=$%04X", cpu->reg.de.value);
           break;
 
         case REG_HL:
-          sprintf(buf, "HL=$%04X", (cpu->reg.h << 8) | cpu->reg.l);
+          sprintf(buf, "HL=$%04X", cpu->reg.hl.value);
           break;
 
         case REG_AF:
-          sprintf(buf, "AF=$%04X", (cpu->reg.a << 8) | cpu->reg.f);
+          sprintf(buf, "AF=$%04X", cpu->reg.af.value);
           break;
 
         case REG_SP:
@@ -708,7 +707,7 @@ char* libyagbe_disasm_execute(struct libyagbe_cpu* const cpu,
           const uint8_t lo = libyagbe_bus_read_memory(bus, npc);
           const uint8_t hi = libyagbe_bus_read_memory(bus, npc + 1);
 
-          const uint16_t address = (hi << 8) | lo;
+          const uint16_t address = (uint16_t)((hi << 8) | lo);
           const uint8_t data = libyagbe_bus_read_memory(bus, address);
 
           sprintf(buf, "[$%04X]=$%02X", address, data);

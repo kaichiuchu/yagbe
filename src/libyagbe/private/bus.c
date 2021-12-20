@@ -38,10 +38,8 @@ uint8_t libyagbe_bus_read_memory(struct libyagbe_bus* const bus,
       return bus->cart.data[address];
 
     case 0xC:
-      return bus->wram[address - 0xC000];
-
     case 0xD:
-      return bus->wram[address - 0xD000];
+      return bus->wram[address - 0xC000];
 
     case 0xF:
       switch ((address >> 8) & 0x0F) {
@@ -87,12 +85,10 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
       return;
 
     case 0xC:
+    case 0xD:
       bus->wram[address - 0xC000] = data;
       return;
 
-    case 0xD:
-      bus->wram[address - 0xD000] = data;
-      return;
 
     case 0xF:
       switch ((address >> 8) & 0x0F) {
@@ -228,5 +224,4 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
       printf("Unhandled write: $%04X <- $%02X\n", address, data);
       return;
   }
-  printf("Unhandled write: $%04X <- $%02X\n", address, data);
 }

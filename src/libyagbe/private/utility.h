@@ -16,27 +16,14 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#include "libyagbe/gb.h"
+#ifndef LIBYAGBE_UTILITY_H
+#define LIBYAGBE_UTILITY_H
 
-#include <assert.h>
-#include <stddef.h>
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-void libyagbe_system_init(struct libyagbe_system* const gb,
-                          const uint8_t* const cart_data) {
-  assert(gb != NULL);
+/* Conditionally sets a bit or clears one without branching. */
+#define SET_BIT_IF(n, bit_mask, condition) n ^= (-(condition) ^ n) & bit_mask
 
-  gb->bus.cart.data = cart_data;
-  libyagbe_system_reset(gb);
-}
-
-void libyagbe_system_reset(struct libyagbe_system* const gb) {
-  assert(gb != NULL);
-  libyagbe_cpu_reset(&gb->cpu);
-}
-
-unsigned int libyagbe_system_step(struct libyagbe_system* const gb) {
-  assert(gb != NULL);
-  libyagbe_cpu_step(&gb->cpu, &gb->bus);
-  
-  return 1;
-}
+#endif /* LIBYAGBE_UTILITY_H */

@@ -36,8 +36,6 @@ void libyagbe_disasm_prepare(const uint16_t pc, struct libyagbe_bus* const bus);
 /**
  * Disassembles a given instruction.
  *
- * @param instruction the instruction to disassemble.
- *
  * @returns The disassembled string. It is your responsibility to free the
  * memory held by the string.
  */
