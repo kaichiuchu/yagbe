@@ -668,6 +668,9 @@ static void alu_add_hl(struct libyagbe_cpu* const cpu, const uint16_t pair) {
 
   const int sum = cpu->reg.hl.value + pair;
 
+  cpu->reg.af.byte.lo = set_half_carry_flag(
+    cpu->reg.af.byte.lo, ((cpu->reg.hl.value ^ pair ^ sum) & 0x1000) != 0);
+
   cpu->reg.af.byte.lo = set_carry_flag(cpu->reg.af.byte.lo, sum > 0xFFFF);
   cpu->reg.hl.value = (uint16_t)sum;
 }
@@ -1002,7 +1005,7 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       return;
 
     case OP_INC_DE:
-      cpu->reg.de.value--;
+      cpu->reg.de.value++;
       return;
 
     case OP_INC_D:
