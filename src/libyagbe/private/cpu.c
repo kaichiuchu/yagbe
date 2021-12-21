@@ -2136,11 +2136,20 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
       case OP_ADD_SP_SIMM8: {
         const int8_t simm8 = (int8_t)read_imm8(cpu, bus);
+        const uint16_t sum = (uint16_t)(cpu->reg.sp + simm8);
+
+        const int result = cpu->reg.sp ^ simm8 ^ sum;
 
         cpu->reg.af.byte.lo &= ~FLAG_Z;
         cpu->reg.af.byte.lo &= ~FLAG_N;
 
-        cpu->reg.sp += simm8;
+        cpu->reg.af.byte.lo =
+            set_half_carry_flag(cpu->reg.af.byte.lo, (result & 0x10) != 0);
+
+        cpu->reg.af.byte.lo =
+            set_carry_flag(cpu->reg.af.byte.lo, (result & 0x100) != 0);
+
+        cpu->reg.sp = sum;
         return;
       }
 
@@ -2201,11 +2210,20 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
       case OP_LD_HL_SP_SIMM8: {
         const int8_t simm8 = (int8_t)read_imm8(cpu, bus);
+        const uint16_t sum = (uint16_t)(cpu->reg.sp + simm8);
+
+        const int result = cpu->reg.sp ^ simm8 ^ sum;
 
         cpu->reg.af.byte.lo &= ~FLAG_Z;
         cpu->reg.af.byte.lo &= ~FLAG_N;
 
-        cpu->reg.hl.value = (uint16_t)(cpu->reg.sp + simm8);
+        cpu->reg.af.byte.lo =
+            set_half_carry_flag(cpu->reg.af.byte.lo, (result & 0x10) != 0);
+
+        cpu->reg.af.byte.lo =
+            set_carry_flag(cpu->reg.af.byte.lo, (result & 0x100) != 0);
+
+        cpu->reg.hl.value = sum;
         return;
       }
 
