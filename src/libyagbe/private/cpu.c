@@ -908,6 +908,14 @@ static uint8_t alu_sra(struct libyagbe_cpu* const cpu, uint8_t n) {
   return n;
 }
 
+static uint8_t alu_bit(uint8_t flag_reg, const int bit_mask, const uint8_t n) {
+  SET_BIT_IF(flag_reg, FLAG_Z, (n & bit_mask) == 0);
+  flag_reg &= ~FLAG_N;
+  flag_reg |= FLAG_H;
+
+  return flag_reg;
+}
+
 void libyagbe_cpu_reset(struct libyagbe_cpu* const cpu) {
   assert(cpu != NULL);
 
@@ -2018,6 +2026,730 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
         case OP_SRL_A:
           cpu->reg.af.byte.hi = alu_srl(cpu, cpu->reg.af.byte.hi);
+          return;
+
+        case OP_BIT_0_B:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 0), cpu->reg.bc.byte.hi);
+          return;
+
+        case OP_BIT_0_C:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 0), cpu->reg.bc.byte.lo);
+          return;
+
+        case OP_BIT_0_D:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 0), cpu->reg.de.byte.hi);
+          return;
+
+        case OP_BIT_0_E:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 0), cpu->reg.de.byte.lo);
+          return;
+
+        case OP_BIT_0_H:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 0), cpu->reg.hl.byte.hi);
+          return;
+
+        case OP_BIT_0_L:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 0), cpu->reg.hl.byte.lo);
+          return;
+
+        case OP_BIT_0_A:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 0), cpu->reg.af.byte.hi);
+          return;
+
+        case OP_BIT_1_B:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.bc.byte.hi);
+          return;
+
+        case OP_BIT_1_C:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.bc.byte.lo);
+          return;
+
+        case OP_BIT_1_D:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.de.byte.hi);
+          return;
+
+        case OP_BIT_1_E:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.de.byte.lo);
+          return;
+
+        case OP_BIT_1_H:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.hl.byte.hi);
+          return;
+
+        case OP_BIT_1_L:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.hl.byte.lo);
+          return;
+
+        case OP_BIT_1_A:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.af.byte.hi);
+          return;
+
+        case OP_BIT_2_B:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 2), cpu->reg.bc.byte.hi);
+          return;
+
+        case OP_BIT_2_C:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 2), cpu->reg.bc.byte.lo);
+          return;
+
+        case OP_BIT_2_D:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 2), cpu->reg.de.byte.hi);
+          return;
+
+        case OP_BIT_2_E:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 2), cpu->reg.de.byte.lo);
+          return;
+
+        case OP_BIT_2_H:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 2), cpu->reg.hl.byte.hi);
+          return;
+
+        case OP_BIT_2_L:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 2), cpu->reg.hl.byte.lo);
+          return;
+
+        case OP_BIT_2_A:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 2), cpu->reg.af.byte.hi);
+          return;
+
+        case OP_BIT_3_B:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.bc.byte.hi);
+          return;
+
+        case OP_BIT_3_C:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.bc.byte.lo);
+          return;
+
+        case OP_BIT_3_D:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.de.byte.hi);
+          return;
+
+        case OP_BIT_3_E:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.de.byte.lo);
+          return;
+
+        case OP_BIT_3_H:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.hl.byte.hi);
+          return;
+
+        case OP_BIT_3_L:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.hl.byte.lo);
+          return;
+
+        case OP_BIT_3_A:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.af.byte.hi);
+          return;
+
+        case OP_BIT_4_B:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 4), cpu->reg.bc.byte.hi);
+          return;
+
+        case OP_BIT_4_C:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 4), cpu->reg.bc.byte.lo);
+          return;
+
+        case OP_BIT_4_D:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 4), cpu->reg.de.byte.hi);
+          return;
+
+        case OP_BIT_4_E:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 4), cpu->reg.de.byte.lo);
+          return;
+
+        case OP_BIT_4_H:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 4), cpu->reg.hl.byte.hi);
+          return;
+
+        case OP_BIT_4_L:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 4), cpu->reg.hl.byte.lo);
+          return;
+
+        case OP_BIT_4_A:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 4), cpu->reg.af.byte.hi);
+          return;
+
+        case OP_BIT_5_B:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.bc.byte.hi);
+          return;
+
+        case OP_BIT_5_C:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.bc.byte.lo);
+          return;
+
+        case OP_BIT_5_D:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.de.byte.hi);
+          return;
+
+        case OP_BIT_5_E:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.de.byte.lo);
+          return;
+
+        case OP_BIT_5_H:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.hl.byte.hi);
+          return;
+
+        case OP_BIT_5_L:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.hl.byte.lo);
+          return;
+
+        case OP_BIT_5_A:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.af.byte.hi);
+          return;
+
+        case OP_BIT_6_B:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 6), cpu->reg.bc.byte.hi);
+          return;
+
+        case OP_BIT_6_C:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 6), cpu->reg.bc.byte.lo);
+          return;
+
+        case OP_BIT_6_D:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 6), cpu->reg.de.byte.hi);
+          return;
+
+        case OP_BIT_6_E:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 6), cpu->reg.de.byte.lo);
+          return;
+
+        case OP_BIT_6_H:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 6), cpu->reg.hl.byte.hi);
+          return;
+
+        case OP_BIT_6_L:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 6), cpu->reg.hl.byte.lo);
+          return;
+
+        case OP_BIT_6_A:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 6), cpu->reg.af.byte.hi);
+          return;
+
+        case OP_BIT_7_B:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.bc.byte.hi);
+          return;
+
+        case OP_BIT_7_C:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.bc.byte.lo);
+          return;
+
+        case OP_BIT_7_D:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.de.byte.hi);
+          return;
+
+        case OP_BIT_7_E:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.de.byte.lo);
+          return;
+
+        case OP_BIT_7_H:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.hl.byte.hi);
+          return;
+
+        case OP_BIT_7_L:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.hl.byte.lo);
+          return;
+
+        case OP_BIT_7_A:
+          cpu->reg.af.byte.lo =
+              alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.af.byte.hi);
+          return;
+
+        case OP_RES_0_B:
+          cpu->reg.bc.byte.hi &= ~(1 << 0);
+          return;
+
+        case OP_RES_0_C:
+          cpu->reg.bc.byte.lo &= ~(1 << 0);
+          return;
+
+        case OP_RES_0_D:
+          cpu->reg.de.byte.hi &= ~(1 << 0);
+          return;
+
+        case OP_RES_0_E:
+          cpu->reg.de.byte.lo &= ~(1 << 0);
+          return;
+
+        case OP_RES_0_H:
+          cpu->reg.hl.byte.hi &= ~(1 << 0);
+          return;
+
+        case OP_RES_0_L:
+          cpu->reg.hl.byte.lo &= ~(1 << 0);
+          return;
+
+        case OP_RES_0_A:
+          cpu->reg.af.byte.hi &= ~(1 << 0);
+          return;
+
+        case OP_RES_1_B:
+          cpu->reg.bc.byte.hi &= ~(1 << 1);
+          return;
+
+        case OP_RES_1_C:
+          cpu->reg.bc.byte.lo &= ~(1 << 1);
+          return;
+
+        case OP_RES_1_D:
+          cpu->reg.de.byte.hi &= ~(1 << 1);
+          return;
+
+        case OP_RES_1_E:
+          cpu->reg.de.byte.lo &= ~(1 << 1);
+          return;
+
+        case OP_RES_1_H:
+          cpu->reg.hl.byte.hi &= ~(1 << 1);
+          return;
+
+        case OP_RES_1_L:
+          cpu->reg.hl.byte.lo &= ~(1 << 1);
+          return;
+
+        case OP_RES_1_A:
+          cpu->reg.af.byte.hi &= ~(1 << 1);
+          return;
+
+        case OP_RES_2_B:
+          cpu->reg.bc.byte.hi &= ~(1 << 2);
+          return;
+
+        case OP_RES_2_C:
+          cpu->reg.bc.byte.lo &= ~(1 << 2);
+          return;
+
+        case OP_RES_2_D:
+          cpu->reg.de.byte.hi &= ~(1 << 2);
+          return;
+
+        case OP_RES_2_E:
+          cpu->reg.de.byte.lo &= ~(1 << 2);
+          return;
+
+        case OP_RES_2_H:
+          cpu->reg.hl.byte.hi &= ~(1 << 2);
+          return;
+
+        case OP_RES_2_L:
+          cpu->reg.hl.byte.lo &= ~(1 << 2);
+          return;
+
+        case OP_RES_2_A:
+          cpu->reg.af.byte.hi &= ~(1 << 2);
+          return;
+
+        case OP_RES_3_B:
+          cpu->reg.bc.byte.hi &= ~(1 << 3);
+          return;
+
+        case OP_RES_3_C:
+          cpu->reg.bc.byte.lo &= ~(1 << 3);
+          return;
+
+        case OP_RES_3_D:
+          cpu->reg.de.byte.hi &= ~(1 << 3);
+          return;
+
+        case OP_RES_3_E:
+          cpu->reg.de.byte.lo &= ~(1 << 3);
+          return;
+
+        case OP_RES_3_H:
+          cpu->reg.hl.byte.hi &= ~(1 << 3);
+          return;
+
+        case OP_RES_3_L:
+          cpu->reg.hl.byte.lo &= ~(1 << 3);
+          return;
+
+        case OP_RES_3_A:
+          cpu->reg.af.byte.hi &= ~(1 << 3);
+          return;
+
+        case OP_RES_4_B:
+          cpu->reg.bc.byte.hi &= ~(1 << 4);
+          return;
+
+        case OP_RES_4_C:
+          cpu->reg.bc.byte.lo &= ~(1 << 4);
+          return;
+
+        case OP_RES_4_D:
+          cpu->reg.de.byte.hi &= ~(1 << 4);
+          return;
+
+        case OP_RES_4_E:
+          cpu->reg.de.byte.lo &= ~(1 << 4);
+          return;
+
+        case OP_RES_4_H:
+          cpu->reg.hl.byte.hi &= ~(1 << 4);
+          return;
+
+        case OP_RES_4_L:
+          cpu->reg.hl.byte.lo &= ~(1 << 4);
+          return;
+
+        case OP_RES_4_A:
+          cpu->reg.af.byte.hi &= ~(1 << 4);
+          return;
+
+        case OP_RES_5_B:
+          cpu->reg.bc.byte.hi &= ~(1 << 5);
+          return;
+
+        case OP_RES_5_C:
+          cpu->reg.bc.byte.lo &= ~(1 << 5);
+          return;
+
+        case OP_RES_5_D:
+          cpu->reg.de.byte.hi &= ~(1 << 5);
+          return;
+
+        case OP_RES_5_E:
+          cpu->reg.de.byte.lo &= ~(1 << 5);
+          return;
+
+        case OP_RES_5_H:
+          cpu->reg.hl.byte.hi &= ~(1 << 5);
+          return;
+
+        case OP_RES_5_L:
+          cpu->reg.hl.byte.lo &= ~(1 << 5);
+          return;
+
+        case OP_RES_5_A:
+          cpu->reg.af.byte.hi &= ~(1 << 5);
+          return;
+
+        case OP_RES_6_B:
+          cpu->reg.bc.byte.hi &= ~(1 << 6);
+          return;
+
+        case OP_RES_6_C:
+          cpu->reg.bc.byte.lo &= ~(1 << 6);
+          return;
+
+        case OP_RES_6_D:
+          cpu->reg.de.byte.hi &= ~(1 << 6);
+          return;
+
+        case OP_RES_6_E:
+          cpu->reg.de.byte.lo &= ~(1 << 6);
+          return;
+
+        case OP_RES_6_H:
+          cpu->reg.hl.byte.hi &= ~(1 << 6);
+          return;
+
+        case OP_RES_6_L:
+          cpu->reg.hl.byte.lo &= ~(1 << 6);
+          return;
+
+        case OP_RES_6_A:
+          cpu->reg.af.byte.hi &= ~(1 << 6);
+          return;
+
+        case OP_RES_7_B:
+          cpu->reg.bc.byte.hi &= ~(1 << 7);
+          return;
+
+        case OP_RES_7_C:
+          cpu->reg.bc.byte.lo &= ~(1 << 7);
+          return;
+
+        case OP_RES_7_D:
+          cpu->reg.de.byte.hi &= ~(1 << 7);
+          return;
+
+        case OP_RES_7_E:
+          cpu->reg.de.byte.lo &= ~(1 << 7);
+          return;
+
+        case OP_RES_7_H:
+          cpu->reg.hl.byte.hi &= ~(1 << 7);
+          return;
+
+        case OP_RES_7_L:
+          cpu->reg.hl.byte.lo &= ~(1 << 7);
+          return;
+
+        case OP_RES_7_A:
+          cpu->reg.af.byte.hi &= ~(1 << 7);
+          return;
+
+        case OP_SET_0_B:
+          cpu->reg.bc.byte.hi |= (1 << 0);
+          return;
+
+        case OP_SET_0_C:
+          cpu->reg.bc.byte.lo |= (1 << 0);
+          return;
+
+        case OP_SET_0_D:
+          cpu->reg.de.byte.hi |= (1 << 0);
+          return;
+
+        case OP_SET_0_E:
+          cpu->reg.de.byte.lo |= (1 << 0);
+          return;
+
+        case OP_SET_0_H:
+          cpu->reg.hl.byte.hi |= (1 << 0);
+          return;
+
+        case OP_SET_0_L:
+          cpu->reg.hl.byte.lo |= (1 << 0);
+          return;
+
+        case OP_SET_0_A:
+          cpu->reg.af.byte.hi |= (1 << 0);
+          return;
+
+        case OP_SET_1_B:
+          cpu->reg.bc.byte.hi |= (1 << 1);
+          return;
+
+        case OP_SET_1_C:
+          cpu->reg.bc.byte.lo |= (1 << 1);
+          return;
+
+        case OP_SET_1_D:
+          cpu->reg.de.byte.hi |= (1 << 1);
+          return;
+
+        case OP_SET_1_E:
+          cpu->reg.de.byte.lo |= (1 << 1);
+          return;
+
+        case OP_SET_1_H:
+          cpu->reg.hl.byte.hi |= (1 << 1);
+          return;
+
+        case OP_SET_1_L:
+          cpu->reg.hl.byte.lo |= (1 << 1);
+          return;
+
+        case OP_SET_1_A:
+          cpu->reg.af.byte.hi |= (1 << 1);
+          return;
+
+        case OP_SET_2_B:
+          cpu->reg.bc.byte.hi |= (1 << 2);
+          return;
+
+        case OP_SET_2_C:
+          cpu->reg.bc.byte.lo |= (1 << 2);
+          return;
+
+        case OP_SET_2_D:
+          cpu->reg.de.byte.hi |= (1 << 2);
+          return;
+
+        case OP_SET_2_E:
+          cpu->reg.de.byte.lo |= (1 << 2);
+          return;
+
+        case OP_SET_2_H:
+          cpu->reg.hl.byte.hi |= (1 << 2);
+          return;
+
+        case OP_SET_2_L:
+          cpu->reg.hl.byte.lo |= (1 << 2);
+          return;
+
+        case OP_SET_2_A:
+          cpu->reg.af.byte.hi |= (1 << 2);
+          return;
+
+        case OP_SET_3_B:
+          cpu->reg.bc.byte.hi |= (1 << 3);
+          return;
+
+        case OP_SET_3_C:
+          cpu->reg.bc.byte.lo |= (1 << 3);
+          return;
+
+        case OP_SET_3_D:
+          cpu->reg.de.byte.hi |= (1 << 3);
+          return;
+
+        case OP_SET_3_E:
+          cpu->reg.de.byte.lo |= (1 << 3);
+          return;
+
+        case OP_SET_3_H:
+          cpu->reg.hl.byte.hi |= (1 << 3);
+          return;
+
+        case OP_SET_3_L:
+          cpu->reg.hl.byte.lo |= (1 << 3);
+          return;
+
+        case OP_SET_3_A:
+          cpu->reg.af.byte.hi |= (1 << 3);
+          return;
+
+        case OP_SET_4_B:
+          cpu->reg.bc.byte.hi |= (1 << 4);
+          return;
+
+        case OP_SET_4_C:
+          cpu->reg.bc.byte.lo |= (1 << 4);
+          return;
+
+        case OP_SET_4_D:
+          cpu->reg.de.byte.hi |= (1 << 4);
+          return;
+
+        case OP_SET_4_E:
+          cpu->reg.de.byte.lo |= (1 << 4);
+          return;
+
+        case OP_SET_4_H:
+          cpu->reg.hl.byte.hi |= (1 << 4);
+          return;
+
+        case OP_SET_4_L:
+          cpu->reg.hl.byte.lo |= (1 << 4);
+          return;
+
+        case OP_SET_4_A:
+          cpu->reg.af.byte.hi |= (1 << 4);
+          return;
+
+        case OP_SET_5_B:
+          cpu->reg.bc.byte.hi |= (1 << 5);
+          return;
+
+        case OP_SET_5_C:
+          cpu->reg.bc.byte.lo |= (1 << 5);
+          return;
+
+        case OP_SET_5_D:
+          cpu->reg.de.byte.hi |= (1 << 5);
+          return;
+
+        case OP_SET_5_E:
+          cpu->reg.de.byte.lo |= (1 << 5);
+          return;
+
+        case OP_SET_5_H:
+          cpu->reg.hl.byte.hi |= (1 << 5);
+          return;
+
+        case OP_SET_5_L:
+          cpu->reg.hl.byte.lo |= (1 << 5);
+          return;
+
+        case OP_SET_5_A:
+          cpu->reg.af.byte.hi |= (1 << 5);
+          return;
+
+        case OP_SET_6_B:
+          cpu->reg.bc.byte.hi |= (1 << 6);
+          return;
+
+        case OP_SET_6_C:
+          cpu->reg.bc.byte.lo |= (1 << 6);
+          return;
+
+        case OP_SET_6_D:
+          cpu->reg.de.byte.hi |= (1 << 6);
+          return;
+
+        case OP_SET_6_E:
+          cpu->reg.de.byte.lo |= (1 << 6);
+          return;
+
+        case OP_SET_6_H:
+          cpu->reg.hl.byte.hi |= (1 << 6);
+          return;
+
+        case OP_SET_6_L:
+          cpu->reg.hl.byte.lo |= (1 << 6);
+          return;
+
+        case OP_SET_6_A:
+          cpu->reg.af.byte.hi |= (1 << 6);
+          return;
+
+        case OP_SET_7_B:
+          cpu->reg.bc.byte.hi |= (1 << 7);
+          return;
+
+        case OP_SET_7_C:
+          cpu->reg.bc.byte.lo |= (1 << 7);
+          return;
+
+        case OP_SET_7_D:
+          cpu->reg.de.byte.hi |= (1 << 7);
+          return;
+
+        case OP_SET_7_E:
+          cpu->reg.de.byte.lo |= (1 << 7);
+          return;
+
+        case OP_SET_7_H:
+          cpu->reg.hl.byte.hi |= (1 << 7);
+          return;
+
+        case OP_SET_7_L:
+          cpu->reg.hl.byte.lo |= (1 << 7);
           return;
 
         case OP_SET_7_A:

@@ -24,6 +24,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 /* Conditionally sets a bit or clears one without branching. */
-#define SET_BIT_IF(n, bit_mask, condition) n ^= (-(condition) ^ n) & bit_mask
+#define SET_BIT_IF(n, bit_mask, condition) n = (n & ~bit_mask) | (-(condition) & bit_mask)
 
 #endif /* LIBYAGBE_UTILITY_H */
