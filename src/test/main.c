@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
   for (;;) {
     //const uint16_t pc = gb.cpu.reg.pc;
 
-    libyagbe_disasm_prepare(gb.cpu.reg.pc, &gb.bus);
+    //libyagbe_disasm_prepare(gb.cpu.reg.pc, &gb.bus);
 
     if (libyagbe_system_step(&gb) == 0) {
       disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
