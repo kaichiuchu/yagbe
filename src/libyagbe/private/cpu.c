@@ -1146,6 +1146,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       cpu->reg.sp++;
       return;
 
+    case OP_INC_MEM_HL: {
+      uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+      data = alu_inc(cpu, data);
+      libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+      return;
+    }
+
     case OP_DEC_MEM_HL: {
       uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
       data = alu_dec(cpu, data);
@@ -1174,6 +1182,10 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_ADD_HL_SP:
       alu_add_hl(cpu, cpu->reg.sp);
+      return;
+
+    case OP_LDD_A_HL:
+      cpu->reg.af.byte.hi = libyagbe_bus_read_memory(bus, cpu->reg.hl.value--);
       return;
 
     case OP_DEC_SP:
@@ -1468,6 +1480,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       alu_add(cpu, cpu->reg.hl.byte.lo, ALU_NORMAL);
       return;
 
+    case OP_ADD_A_MEM_HL: {
+      const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+
+      alu_add(cpu, data, ALU_NORMAL);
+      return;
+    }
+
     case OP_ADD_A_A:
       alu_add(cpu, cpu->reg.af.byte.hi, ALU_NORMAL);
       return;
@@ -1495,6 +1514,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
     case OP_ADC_A_L:
       alu_add(cpu, cpu->reg.hl.byte.lo, ALU_WITH_CARRY);
       return;
+
+    case OP_ADC_A_MEM_HL: {
+      const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+
+      alu_add(cpu, data, ALU_WITH_CARRY);
+      return;
+    }
 
     case OP_ADC_A_A:
       alu_add(cpu, cpu->reg.af.byte.hi, ALU_WITH_CARRY);
@@ -1524,6 +1550,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       alu_sub(cpu, cpu->reg.hl.byte.lo, ALU_NORMAL);
       return;
 
+    case OP_SUB_MEM_HL: {
+      const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+
+      alu_sub(cpu, data, ALU_NORMAL);
+      return;
+    }
+
     case OP_SUB_A:
       alu_sub(cpu, cpu->reg.af.byte.hi, ALU_NORMAL);
       return;
@@ -1551,6 +1584,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
     case OP_SBC_A_L:
       alu_sub(cpu, cpu->reg.hl.byte.lo, ALU_WITH_CARRY);
       return;
+
+    case OP_SBC_A_MEM_HL: {
+      const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+
+      alu_sub(cpu, data, ALU_WITH_CARRY);
+      return;
+    }
 
     case OP_SBC_A_A:
       alu_sub(cpu, cpu->reg.af.byte.hi, ALU_WITH_CARRY);
@@ -1591,6 +1631,15 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       cpu->reg.af.byte.lo = (cpu->reg.af.byte.hi == 0) ? 0xA0 : 0x20;
 
       return;
+
+    case OP_AND_MEM_HL: {
+      const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+
+      cpu->reg.af.byte.hi &= data;
+      cpu->reg.af.byte.lo = (cpu->reg.af.byte.hi == 0) ? 0xA0 : 0x20;
+
+      return;
+    }
 
     case OP_AND_A:
       cpu->reg.af.byte.lo = (cpu->reg.af.byte.hi == 0) ? 0xA0 : 0x20;
@@ -1806,6 +1855,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo = alu_rlc(cpu, cpu->reg.hl.byte.lo, ALU_NORMAL);
           return;
 
+        case OP_RLC_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data = alu_rlc(cpu, data, ALU_NORMAL);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_RLC_A:
           cpu->reg.af.byte.hi =
               alu_rlc(cpu, cpu->reg.af.byte.hi, ALU_NORMAL);
@@ -1835,6 +1892,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo = alu_rrc(cpu, cpu->reg.hl.byte.lo, ALU_NORMAL);
           return;
 
+        case OP_RRC_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data = alu_rrc(cpu, data, ALU_NORMAL);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_RRC_A:
           cpu->reg.af.byte.hi = alu_rrc(cpu, cpu->reg.af.byte.hi, ALU_NORMAL);
           return;
@@ -1862,6 +1927,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_RL_L:
           cpu->reg.hl.byte.lo = alu_rl(cpu, cpu->reg.hl.byte.lo, ALU_NORMAL);
           return;
+
+        case OP_RL_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data = alu_rl(cpu, data, ALU_NORMAL);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_RL_A:
           cpu->reg.af.byte.hi = alu_rl(cpu, cpu->reg.af.byte.hi, ALU_NORMAL);
@@ -1891,6 +1964,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo = alu_rr(cpu, cpu->reg.hl.byte.lo, ALU_NORMAL);
           return;
 
+        case OP_RR_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data = alu_rr(cpu, data, ALU_NORMAL);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_RR_A:
           cpu->reg.af.byte.hi = alu_rr(cpu, cpu->reg.af.byte.hi, ALU_NORMAL);
           return;
@@ -1919,6 +2000,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo = alu_sla(cpu, cpu->reg.hl.byte.lo);
           return;
 
+        case OP_SLA_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data = alu_sla(cpu, data);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_SLA_A:
           cpu->reg.af.byte.hi = alu_sla(cpu, cpu->reg.af.byte.hi);
           return;
@@ -1946,6 +2035,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_SRA_L:
           cpu->reg.hl.byte.lo = alu_sra(cpu, cpu->reg.hl.byte.lo);
           return;
+
+        case OP_SRA_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data = alu_sra(cpu, data);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_SRA_A:
           cpu->reg.af.byte.hi = alu_sra(cpu, cpu->reg.af.byte.hi);
@@ -1993,6 +2090,16 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
           return;
 
+        case OP_SWAP_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+
+          data = (uint8_t)((data & 0x0F) << 4) | (data >> 4);
+          cpu->reg.af.byte.lo = (data == 0) ? 0x80 : 0x00;
+
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+          return;
+        }
+
         case OP_SWAP_A:
           cpu->reg.af.byte.hi = (uint8_t)((cpu->reg.af.byte.hi & 0x0F) << 4) |
                                 (cpu->reg.af.byte.hi >> 4);
@@ -2023,6 +2130,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_SRL_L:
           cpu->reg.hl.byte.lo = alu_srl(cpu, cpu->reg.hl.byte.lo);
           return;
+
+        case OP_SRL_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data = alu_srl(cpu, data);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_SRL_A:
           cpu->reg.af.byte.hi = alu_srl(cpu, cpu->reg.af.byte.hi);
@@ -2057,6 +2172,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.af.byte.lo =
               alu_bit(cpu->reg.af.byte.lo, (1 << 0), cpu->reg.hl.byte.lo);
           return;
+
+        case OP_BIT_0_HL: {
+          const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          cpu->reg.af.byte.lo = alu_bit(cpu->reg.af.byte.lo, (1 << 0), data);
+
+          return;
+        }
 
         case OP_BIT_0_A:
           cpu->reg.af.byte.lo =
@@ -2093,6 +2215,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
               alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.hl.byte.lo);
           return;
 
+        case OP_BIT_1_HL: {
+          const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          cpu->reg.af.byte.lo = alu_bit(cpu->reg.af.byte.lo, (1 << 1), data);
+
+          return;
+        }
+
         case OP_BIT_1_A:
           cpu->reg.af.byte.lo =
               alu_bit(cpu->reg.af.byte.lo, (1 << 1), cpu->reg.af.byte.hi);
@@ -2127,6 +2256,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.af.byte.lo =
               alu_bit(cpu->reg.af.byte.lo, (1 << 2), cpu->reg.hl.byte.lo);
           return;
+
+        case OP_BIT_2_HL: {
+          const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          cpu->reg.af.byte.lo = alu_bit(cpu->reg.af.byte.lo, (1 << 2), data);
+
+          return;
+        }
 
         case OP_BIT_2_A:
           cpu->reg.af.byte.lo =
@@ -2163,6 +2299,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
               alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.hl.byte.lo);
           return;
 
+        case OP_BIT_3_HL: {
+          const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          cpu->reg.af.byte.lo = alu_bit(cpu->reg.af.byte.lo, (1 << 3), data);
+
+          return;
+        }
+
         case OP_BIT_3_A:
           cpu->reg.af.byte.lo =
               alu_bit(cpu->reg.af.byte.lo, (1 << 3), cpu->reg.af.byte.hi);
@@ -2197,6 +2340,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.af.byte.lo =
               alu_bit(cpu->reg.af.byte.lo, (1 << 4), cpu->reg.hl.byte.lo);
           return;
+
+        case OP_BIT_4_HL: {
+          const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          cpu->reg.af.byte.lo = alu_bit(cpu->reg.af.byte.lo, (1 << 4), data);
+
+          return;
+        }
 
         case OP_BIT_4_A:
           cpu->reg.af.byte.lo =
@@ -2233,6 +2383,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
               alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.hl.byte.lo);
           return;
 
+        case OP_BIT_5_HL: {
+          const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          cpu->reg.af.byte.lo = alu_bit(cpu->reg.af.byte.lo, (1 << 5), data);
+
+          return;
+        }
+
         case OP_BIT_5_A:
           cpu->reg.af.byte.lo =
               alu_bit(cpu->reg.af.byte.lo, (1 << 5), cpu->reg.af.byte.hi);
@@ -2267,6 +2424,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.af.byte.lo =
               alu_bit(cpu->reg.af.byte.lo, (1 << 6), cpu->reg.hl.byte.lo);
           return;
+
+        case OP_BIT_6_HL: {
+          const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          cpu->reg.af.byte.lo = alu_bit(cpu->reg.af.byte.lo, (1 << 6), data);
+
+          return;
+        }
 
         case OP_BIT_6_A:
           cpu->reg.af.byte.lo =
@@ -2303,6 +2467,13 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
               alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.hl.byte.lo);
           return;
 
+        case OP_BIT_7_HL: {
+          const uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          cpu->reg.af.byte.lo = alu_bit(cpu->reg.af.byte.lo, (1 << 7), data);
+
+          return;
+        }
+
         case OP_BIT_7_A:
           cpu->reg.af.byte.lo =
               alu_bit(cpu->reg.af.byte.lo, (1 << 7), cpu->reg.af.byte.hi);
@@ -2332,6 +2503,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo &= ~(1 << 0);
           return;
 
+        case OP_RES_0_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data &= ~(1 << 0);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_RES_0_A:
           cpu->reg.af.byte.hi &= ~(1 << 0);
           return;
@@ -2359,6 +2538,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_RES_1_L:
           cpu->reg.hl.byte.lo &= ~(1 << 1);
           return;
+
+        case OP_RES_1_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data &= ~(1 << 1);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_RES_1_A:
           cpu->reg.af.byte.hi &= ~(1 << 1);
@@ -2388,6 +2575,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo &= ~(1 << 2);
           return;
 
+        case OP_RES_2_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data &= ~(1 << 2);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_RES_2_A:
           cpu->reg.af.byte.hi &= ~(1 << 2);
           return;
@@ -2415,6 +2610,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_RES_3_L:
           cpu->reg.hl.byte.lo &= ~(1 << 3);
           return;
+
+        case OP_RES_3_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data &= ~(1 << 3);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_RES_3_A:
           cpu->reg.af.byte.hi &= ~(1 << 3);
@@ -2444,6 +2647,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo &= ~(1 << 4);
           return;
 
+        case OP_RES_4_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data &= ~(1 << 4);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_RES_4_A:
           cpu->reg.af.byte.hi &= ~(1 << 4);
           return;
@@ -2471,6 +2682,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_RES_5_L:
           cpu->reg.hl.byte.lo &= ~(1 << 5);
           return;
+
+        case OP_RES_5_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data &= ~(1 << 5);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_RES_5_A:
           cpu->reg.af.byte.hi &= ~(1 << 5);
@@ -2500,6 +2719,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo &= ~(1 << 6);
           return;
 
+        case OP_RES_6_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data &= ~(1 << 6);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_RES_6_A:
           cpu->reg.af.byte.hi &= ~(1 << 6);
           return;
@@ -2527,6 +2754,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_RES_7_L:
           cpu->reg.hl.byte.lo &= ~(1 << 7);
           return;
+
+        case OP_RES_7_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data &= ~(1 << 7);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_RES_7_A:
           cpu->reg.af.byte.hi &= ~(1 << 7);
@@ -2556,6 +2791,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo |= (1 << 0);
           return;
 
+        case OP_SET_0_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data |= (1 << 0);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_SET_0_A:
           cpu->reg.af.byte.hi |= (1 << 0);
           return;
@@ -2583,6 +2826,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_SET_1_L:
           cpu->reg.hl.byte.lo |= (1 << 1);
           return;
+
+        case OP_SET_1_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data |= (1 << 1);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_SET_1_A:
           cpu->reg.af.byte.hi |= (1 << 1);
@@ -2612,6 +2863,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo |= (1 << 2);
           return;
 
+        case OP_SET_2_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data |= (1 << 2);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_SET_2_A:
           cpu->reg.af.byte.hi |= (1 << 2);
           return;
@@ -2639,6 +2898,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_SET_3_L:
           cpu->reg.hl.byte.lo |= (1 << 3);
           return;
+
+        case OP_SET_3_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data |= (1 << 3);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_SET_3_A:
           cpu->reg.af.byte.hi |= (1 << 3);
@@ -2668,6 +2935,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo |= (1 << 4);
           return;
 
+        case OP_SET_4_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data |= (1 << 4);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_SET_4_A:
           cpu->reg.af.byte.hi |= (1 << 4);
           return;
@@ -2695,6 +2970,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_SET_5_L:
           cpu->reg.hl.byte.lo |= (1 << 5);
           return;
+
+        case OP_SET_5_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data |= (1 << 5);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_SET_5_A:
           cpu->reg.af.byte.hi |= (1 << 5);
@@ -2724,6 +3007,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.hl.byte.lo |= (1 << 6);
           return;
 
+        case OP_SET_6_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data |= (1 << 6);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
+
         case OP_SET_6_A:
           cpu->reg.af.byte.hi |= (1 << 6);
           return;
@@ -2751,6 +3042,14 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         case OP_SET_7_L:
           cpu->reg.hl.byte.lo |= (1 << 7);
           return;
+
+        case OP_SET_7_HL: {
+          uint8_t data = libyagbe_bus_read_memory(bus, cpu->reg.hl.value);
+          data |= (1 << 7);
+          libyagbe_bus_write_memory(bus, cpu->reg.hl.value, data);
+
+          return;
+        }
 
         case OP_SET_7_A:
           cpu->reg.af.byte.hi |= (1 << 7);
@@ -2849,6 +3148,11 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         cpu->reg.hl.value = stack_pop(cpu, bus);
         return;
 
+      case OP_LD_MEM_FF00_C_A:
+        libyagbe_bus_write_memory(bus, 0xFF00 + cpu->reg.bc.byte.lo,
+                                  cpu->reg.af.byte.hi);
+        return;
+
       case OP_PUSH_HL:
         stack_push(cpu, bus, cpu->reg.hl.byte.hi, cpu->reg.hl.byte.lo);
         return;
@@ -2918,6 +3222,11 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
       case OP_POP_AF:
         cpu->reg.af.value = stack_pop(cpu, bus) & ~0x000F;
+        return;
+
+      case OP_LD_A_MEM_FF00_C:
+        cpu->reg.af.byte.hi =
+            libyagbe_bus_read_memory(bus, 0xFF00 + cpu->reg.bc.byte.lo);
         return;
 
       case OP_DI:

@@ -89,7 +89,6 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
       bus->wram[address - 0xC000] = data;
       return;
 
-
     case 0xF:
       switch ((address >> 8) & 0x0F) {
         case 0xF:
