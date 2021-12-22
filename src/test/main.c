@@ -58,7 +58,7 @@ static uint8_t* open_rom(const char* const file) {
 int main(int argc, char* argv[]) {
   uint8_t* rom_data;
   struct libyagbe_system gb;
-  char* disasm;
+  /*char* disasm; */
 
   if (argc < 2) {
     fprintf(stderr, "%s: missing required argument.\n", argv[0]);
@@ -71,18 +71,18 @@ int main(int argc, char* argv[]) {
   libyagbe_system_init(&gb, rom_data);
 
   for (;;) {
-    //const uint16_t pc = gb.cpu.reg.pc;
+    /*const uint16_t pc = gb.cpu.reg.pc;*/
 
-    //libyagbe_disasm_prepare(gb.cpu.reg.pc, &gb.bus);
+    /*libyagbe_disasm_prepare(gb.cpu.reg.pc, &gb.bus);*/
 
     if (libyagbe_system_step(&gb) == 0) {
-      disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
-      //printf("$%04X: %s\n", pc, disasm);
+      /*disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus); */
+      /* printf("$%04X: %s\n", pc, disasm); */
 
       return EXIT_FAILURE;
     }
 
-    disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
-    //printf("$%04X: %s\n", pc, disasm);
+    /*disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);*/
+    /*printf("$%04X: %s\n", pc, disasm);*/
   }
 }

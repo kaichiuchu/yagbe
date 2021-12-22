@@ -17,16 +17,16 @@
  */
 
 /* Some notes:
-*
-*  a) while we do use branchless versions of some bit operations, they're
-*     wrapped around function calls. The overhead of the function call may,
-*     assuming it's not inlined negate any performance advantage of the
-*     branchless techniques. Must investigate further, but it's too early to
-*     worry about that now.
-* 
-*  b) Due to the fact we can't use anonymous structs/unions from C11 (unless we
-*     can figure out a seamless wrapper), there is a readability issue.
-*/
+ *
+ *  a) while we do use branchless versions of some bit operations, they're
+ *     wrapped around function calls. The overhead of the function call may,
+ *     assuming it's not inlined negate any performance advantage of the
+ *     branchless techniques. Must investigate further, but it's too early to
+ *     worry about that now.
+ *
+ *  b) Due to the fact we can't use anonymous structs/unions from C11 (unless we
+ *     can figure out a seamless wrapper), there is a readability issue.
+ */
 
 #include "libyagbe/cpu.h"
 
@@ -50,7 +50,7 @@ enum cpu_flag_bits {
    * When the result of a 16-bit addition is higher than $FFFF.
    * When the result of a subtraction or comparison is lower than zero (like in
    * Z80 and 80x86 CPUs, but unlike in 65XX and ARM CPUs). When a rotate/shift
-   * operation shifts out a “1” bit.
+   * operation shifts out a ï¿½1ï¿½ bit.
    *
    * Used by conditional jumps and instructions such as ADC, SBC, RL, RLA, etc.
    */
@@ -592,13 +592,13 @@ static void stack_push(struct libyagbe_cpu* const cpu,
 }
 
 /* @brief Reads the immediate byte referenced by the program counter, then
-*  increments the program counter.
-*
-* @param cpu The CPU instance.
-* @param bus The system bus instance.
-* 
-* @returns The immediate byte.
-*/
+ *  increments the program counter.
+ *
+ * @param cpu The CPU instance.
+ * @param bus The system bus instance.
+ *
+ * @returns The immediate byte.
+ */
 static uint8_t read_imm8(struct libyagbe_cpu* const cpu,
                          struct libyagbe_bus* const bus) {
   assert(cpu != NULL);
@@ -607,14 +607,18 @@ static uint8_t read_imm8(struct libyagbe_cpu* const cpu,
   return libyagbe_bus_read_memory(bus, cpu->reg.pc++);
 }
 
-/* @brief Reads the next two bytes from memory referenced by the program counter. */
+/* @brief Reads the next two bytes from memory referenced by the program
+ * counter. */
 static uint16_t read_imm16(struct libyagbe_cpu* const cpu,
                            struct libyagbe_bus* const bus) {
+  uint8_t lo;
+  uint8_t hi;
+
   assert(cpu != NULL);
   assert(bus != NULL);
 
-  const uint8_t lo = read_imm8(cpu, bus);
-  const uint8_t hi = read_imm8(cpu, bus);
+  lo = read_imm8(cpu, bus);
+  hi = read_imm8(cpu, bus);
 
   return (uint16_t)((hi << 8) | lo);
 }
@@ -662,14 +666,16 @@ static uint8_t alu_dec(struct libyagbe_cpu* const cpu, uint8_t value) {
 }
 
 static void alu_add_hl(struct libyagbe_cpu* const cpu, const uint16_t pair) {
+  int sum;
+
   assert(cpu != NULL);
 
   cpu->reg.af.byte.lo &= ~FLAG_N;
 
-  const int sum = cpu->reg.hl.value + pair;
+  sum = cpu->reg.hl.value + pair;
 
   cpu->reg.af.byte.lo = set_half_carry_flag(
-    cpu->reg.af.byte.lo, ((cpu->reg.hl.value ^ pair ^ sum) & 0x1000) != 0);
+      cpu->reg.af.byte.lo, ((cpu->reg.hl.value ^ pair ^ sum) & 0x1000) != 0);
 
   cpu->reg.af.byte.lo = set_carry_flag(cpu->reg.af.byte.lo, sum > 0xFFFF);
   cpu->reg.hl.value = (uint16_t)sum;
@@ -677,11 +683,14 @@ static void alu_add_hl(struct libyagbe_cpu* const cpu, const uint16_t pair) {
 
 static uint8_t alu_rr(struct libyagbe_cpu* const cpu, uint8_t reg,
                       const enum alu_flag flag) {
+  uint8_t old_carry_flag_value;
+
+  assert(cpu != NULL);
+
   cpu->reg.af.byte.lo &= ~FLAG_N;
   cpu->reg.af.byte.lo &= ~FLAG_H;
 
-  const uint8_t old_carry_flag_value =
-      ((cpu->reg.af.byte.lo & FLAG_C) != 0) ? 0x80 : 0x00;
+  old_carry_flag_value = ((cpu->reg.af.byte.lo & FLAG_C) != 0) ? 0x80 : 0x00;
 
   cpu->reg.af.byte.lo = set_carry_flag(cpu->reg.af.byte.lo, (reg & 1) != 0);
 
@@ -697,13 +706,16 @@ static uint8_t alu_rr(struct libyagbe_cpu* const cpu, uint8_t reg,
   return reg;
 }
 
-static uint8_t alu_rl(struct libyagbe_cpu* const cpu, uint8_t reg, const enum alu_flag flag) {
+static uint8_t alu_rl(struct libyagbe_cpu* const cpu, uint8_t reg,
+                      const enum alu_flag flag) {
+  uint8_t old_carry_flag_value;
+
   assert(cpu != NULL);
 
   cpu->reg.af.byte.lo &= ~FLAG_N;
   cpu->reg.af.byte.lo &= ~FLAG_H;
 
-  const uint8_t old_carry_flag_value = (cpu->reg.af.byte.lo & FLAG_C) != 0;
+  old_carry_flag_value = (cpu->reg.af.byte.lo & FLAG_C) != 0;
 
   cpu->reg.af.byte.lo = set_carry_flag(cpu->reg.af.byte.lo, (reg & 0x80) != 0);
   reg = (uint8_t)((reg << 1) | old_carry_flag_value);
@@ -719,17 +731,20 @@ static uint8_t alu_rl(struct libyagbe_cpu* const cpu, uint8_t reg, const enum al
 
 static void alu_add(struct libyagbe_cpu* const cpu, const uint8_t addend,
                     const enum alu_flag flag) {
+  int sum;
+  uint8_t result;
+
   assert(cpu != NULL);
 
   cpu->reg.af.byte.lo &= ~FLAG_N;
 
-  int sum = cpu->reg.af.byte.hi + addend;
+  sum = cpu->reg.af.byte.hi + addend;
 
   if (flag == ALU_WITH_CARRY) {
     sum += (cpu->reg.af.byte.lo & FLAG_C) != 0;
   }
 
-  const uint8_t result = (uint8_t)sum;
+  result = (uint8_t)sum;
 
   cpu->reg.af.byte.lo = set_zero_flag(cpu->reg.af.byte.lo, result);
 
@@ -743,17 +758,20 @@ static void alu_add(struct libyagbe_cpu* const cpu, const uint8_t addend,
 
 static void alu_sub(struct libyagbe_cpu* const cpu, uint8_t subtrahend,
                     const enum alu_flag flag) {
+  int diff;
+  uint8_t result;
+
   assert(cpu != NULL);
 
   cpu->reg.af.byte.lo |= FLAG_N;
 
-  int diff = cpu->reg.af.byte.hi - subtrahend;
+  diff = cpu->reg.af.byte.hi - subtrahend;
 
   if (flag == ALU_WITH_CARRY) {
     diff -= (cpu->reg.af.byte.lo & FLAG_C) != 0;
   }
 
-  const uint8_t result = (uint8_t)diff;
+  result = (uint8_t)diff;
 
   cpu->reg.af.byte.lo = set_zero_flag(cpu->reg.af.byte.lo, result);
 
@@ -761,8 +779,7 @@ static void alu_sub(struct libyagbe_cpu* const cpu, uint8_t subtrahend,
       cpu->reg.af.byte.lo,
       ((cpu->reg.af.byte.hi ^ subtrahend ^ diff) & 0x10) != 0);
 
-  cpu->reg.af.byte.lo =
-      set_carry_flag(cpu->reg.af.byte.lo, diff < 0);
+  cpu->reg.af.byte.lo = set_carry_flag(cpu->reg.af.byte.lo, diff < 0);
 
   if (flag != ALU_DISCARD_RESULT) {
     cpu->reg.af.byte.hi = result;
@@ -782,10 +799,12 @@ static uint8_t alu_srl(struct libyagbe_cpu* const cpu, uint8_t reg) {
 
 static void call_if(struct libyagbe_cpu* const cpu,
                     struct libyagbe_bus* const bus, const bool condition_met) {
+  uint16_t address;
+
   assert(cpu != NULL);
   assert(bus != NULL);
 
-  const uint16_t address = read_imm16(cpu, bus);
+  address = read_imm16(cpu, bus);
 
   if (condition_met) {
     stack_push(cpu, bus, cpu->reg.pc >> 8, cpu->reg.pc & 0x00FF);
@@ -795,10 +814,12 @@ static void call_if(struct libyagbe_cpu* const cpu,
 
 static void jr_if(struct libyagbe_bus* const bus,
                   struct libyagbe_cpu* const cpu, const bool condition_met) {
+  int8_t imm;
+
   assert(bus != NULL);
   assert(cpu != NULL);
 
-  const int8_t imm = (int8_t)read_imm8(cpu, bus);
+  imm = (int8_t)read_imm8(cpu, bus);
 
   if (condition_met) {
     cpu->reg.pc += imm;
@@ -807,10 +828,12 @@ static void jr_if(struct libyagbe_bus* const bus,
 
 static void jp_if(struct libyagbe_cpu* const cpu,
                   struct libyagbe_bus* const bus, const bool condition_met) {
+  uint16_t address;
+
   assert(bus != NULL);
   assert(cpu != NULL);
 
-  const uint16_t address = read_imm16(cpu, bus);
+  address = read_imm16(cpu, bus);
 
   if (condition_met) {
     cpu->reg.pc = address;
@@ -819,11 +842,14 @@ static void jp_if(struct libyagbe_cpu* const cpu,
 
 static uint16_t stack_pop(struct libyagbe_cpu* const cpu,
                           struct libyagbe_bus* const bus) {
+  uint8_t lo;
+  uint8_t hi;
+
   assert(cpu != NULL);
   assert(bus != NULL);
 
-  const uint8_t lo = libyagbe_bus_read_memory(bus, cpu->reg.sp++);
-  const uint8_t hi = libyagbe_bus_read_memory(bus, cpu->reg.sp++);
+  lo = libyagbe_bus_read_memory(bus, cpu->reg.sp++);
+  hi = libyagbe_bus_read_memory(bus, cpu->reg.sp++);
 
   return (uint16_t)((hi << 8) | lo);
 }
@@ -839,7 +865,7 @@ static void ret_if(struct libyagbe_cpu* const cpu,
 }
 
 static void rst(struct libyagbe_cpu* const cpu, struct libyagbe_bus* const bus,
-    const uint16_t address) {
+                const uint16_t address) {
   assert(bus != NULL);
   assert(cpu != NULL);
 
@@ -847,7 +873,8 @@ static void rst(struct libyagbe_cpu* const cpu, struct libyagbe_bus* const bus,
   cpu->reg.pc = address;
 }
 
-static uint8_t alu_rlc(struct libyagbe_cpu* const cpu, uint8_t n, const enum alu_flag flag) {
+static uint8_t alu_rlc(struct libyagbe_cpu* const cpu, uint8_t n,
+                       const enum alu_flag flag) {
   assert(cpu != NULL);
 
   cpu->reg.af.byte.lo &= ~FLAG_N;
@@ -864,7 +891,8 @@ static uint8_t alu_rlc(struct libyagbe_cpu* const cpu, uint8_t n, const enum alu
   return n;
 }
 
-static uint8_t alu_rrc(struct libyagbe_cpu* const cpu, uint8_t n, const enum alu_flag flag) {
+static uint8_t alu_rrc(struct libyagbe_cpu* const cpu, uint8_t n,
+                       const enum alu_flag flag) {
   assert(cpu != NULL);
 
   cpu->reg.af.byte.lo &= ~FLAG_N;
@@ -1864,8 +1892,7 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         }
 
         case OP_RLC_A:
-          cpu->reg.af.byte.hi =
-              alu_rlc(cpu, cpu->reg.af.byte.hi, ALU_NORMAL);
+          cpu->reg.af.byte.hi = alu_rlc(cpu, cpu->reg.af.byte.hi, ALU_NORMAL);
           return;
 
         case OP_RRC_B:
@@ -3294,5 +3321,5 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         break;
     }
   }
-  __debugbreak();
+  /*__debugbreak(); */
 }

@@ -57,262 +57,262 @@ struct disasm_data {
 };
 
 static const struct disasm_data main_opcodes[256] = {
-    {"NOP", OP_NONE, REG_UNUSED},               /* 0x00 */
-    {"LD BC, $%04X", OP_IMM16, REG_BC},         /* 0x01 */
-    {"LD (BC), A", OP_NONE, REG_BC},            /* 0x02 */
-    {"INC BC", OP_NONE, REG_BC},                /* 0x03 */
-    {"INC B", OP_NONE, REG_B},                  /* 0x04 */
-    {"DEC B", OP_NONE, REG_B},                  // 0x05
-    {"LD B, $%02X", OP_IMM8, REG_B},            // 0x06
-    {"RLCA", OP_NONE, REG_UNUSED},              // 0x07
-    {"LD ($%04X), SP", OP_IMM16, REG_UNUSED},   // 0x08
-    {"ADD HL, BC", OP_NONE, REG_UNUSED},        // 0x09
-    {"LD A, (BC)", OP_NONE, REG_BC},            // 0x0A
-    {"DEC BC", OP_NONE, REG_BC},                // 0x0B
-    {"INC C", OP_NONE, REG_C},                  // 0x0C
-    {"DEC C", OP_NONE, REG_C},                  // 0x0D
-    {"LD C, $%02X", OP_IMM8, REG_C},            // 0x0E
-    {"RRCA", OP_NONE, REG_UNUSED},              // 0x0F
-    {"STOP", OP_NONE, REG_UNUSED},              // 0x10
-    {"LD DE, $%04X", OP_IMM16, REG_DE},         // 0x11
-    {"LD (DE), A", OP_NONE, REG_A | REG_DE},    // 0x12
-    {"INC DE", OP_NONE, REG_DE},                // 0x13
-    {"INC D", OP_NONE, REG_D | REG_F},          // 0x14
-    {"DEC D", OP_NONE, REG_D},                  // 0x15
-    {"LD D, $%02X", OP_IMM8, REG_D},            // 0x16
-    {"RLA", OP_NONE, REG_UNUSED},               // 0x17
-    {"JR $%04X", OP_SIMM8, REG_UNUSED},         // 0x18
-    {"ADD HL, DE", OP_NONE, REG_UNUSED},        // 0x19
-    {"LD A, (DE)", OP_NONE, REG_DE},            // 0x1A
-    {"DEC DE", OP_NONE, REG_DE},                // 0x1B
-    {"INC E", OP_NONE, REG_E | REG_F},          // 0x1C
-    {"DEC E", OP_NONE, REG_E},                  // 0x1D
-    {"LD E, $%02X", OP_IMM8, REG_E},            // 0x1E
-    {"RRA", OP_NONE, REG_A | REG_F},            // 0x1F
-    {"JR NZ, $%04X", OP_SIMM8, REG_UNUSED},     // 0x20
-    {"LD HL, $%04X", OP_IMM16, REG_HL},         // 0x21
-    {"LDI (HL), A", OP_NONE, REG_HL},           // 0x22
-    {"INC HL", OP_NONE, REG_HL},                // 0x23
-    {"INC H", OP_NONE, REG_H},                  // 0x24
-    {"DEC H", OP_NONE, REG_H},                  // 0x25
-    {"LD H, $%02X", OP_IMM8, REG_H},            // 0x26
-    {"DAA", OP_NONE, REG_A},                    // 0x27
-    {"JR Z, $%04X", OP_SIMM8, REG_UNUSED},      // 0x28
-    {"ADD HL, HL", OP_NONE, REG_HL | REG_F},    // 0x29
-    {"LDI A, (HL)", OP_NONE, REG_A | REG_HL},   // 0x2A
-    {"DEC HL", OP_NONE, REG_HL},                // 0x2B
-    {"INC L", OP_NONE, REG_L},                  // 0x2C
-    {"DEC L", OP_NONE, REG_L},                  // 0x2D
-    {"LD L, $%02X", OP_IMM8, REG_L},            // 0x2E
-    {"CPL", OP_NONE, REG_UNUSED},               // 0x2F
-    {"JR NC, $%04X", OP_SIMM8, REG_UNUSED},     // 0x30
-    {"LD SP, $%04X", OP_IMM16, REG_SP},         // 0x31
-    {"LDD (HL), A", OP_NONE, REG_HL},           // 0x32
-    {"INC SP", OP_NONE, REG_SP},                // 0x33
-    {"INC (HL)", OP_NONE, REG_HL_MEM},          // 0x34
-    {"DEC (HL)", OP_NONE, REG_HL_MEM},          // 0x35
-    {"LD (HL), $%02X", OP_IMM8, REG_HL_MEM},    // 0x36
-    {"SCF", OP_NONE, REG_UNUSED},               // 0x37
-    {"JR C, $%04X", OP_SIMM8, REG_UNUSED},      // 0x38
-    {"ADD HL, SP", OP_NONE, REG_UNUSED},        // 0x39
-    {"LDD, A, (HL)", OP_NONE, REG_HL},          // 0x3A
-    {"DEC SP", OP_NONE, REG_UNUSED},            // 0x3B
-    {"INC A", OP_NONE, REG_A},                  // 0x3C
-    {"DEC A", OP_NONE, REG_A},                  // 0x3D
-    {"LD A, $%02X", OP_IMM8, REG_A},            // 0x3E
-    {"CCF", OP_NONE, REG_UNUSED},               // 0x3F
-    {"LD B, B", OP_NONE, REG_B},                // 0x40
-    {"LD B, C", OP_NONE, REG_B},                // 0x41
-    {"LD B, D", OP_NONE, REG_B},                // 0x42
-    {"LD B, E", OP_NONE, REG_B},                // 0x43
-    {"LD B, H", OP_NONE, REG_B},                // 0x44
-    {"LD B, L", OP_NONE, REG_B},                // 0x45
-    {"LD B, (HL)", OP_NONE, REG_B},             // 0x46
-    {"LD B, A", OP_NONE, REG_B},                // 0x47
-    {"LD C, B", OP_NONE, REG_C},                // 0x48
-    {"LD C, C", OP_NONE, REG_C},                // 0x49
-    {"LD C, D", OP_NONE, REG_C},                // 0x4A
-    {"LD C, E", OP_NONE, REG_C},                // 0x4B
-    {"LD C, H", OP_NONE, REG_C},                // 0x4C
-    {"LD C, L", OP_NONE, REG_C},                // 0x4D
-    {"LD C, (HL)", OP_NONE, REG_C},             // 0x4E
-    {"LD C, A", OP_NONE, REG_C},                // 0x4F
-    {"LD D, B", OP_NONE, REG_D},                // 0x50
-    {"LD D, C", OP_NONE, REG_D},                // 0x51
-    {"LD D, D", OP_NONE, REG_D},                // 0x52
-    {"LD D, E", OP_NONE, REG_D},                // 0x53
-    {"LD D, H", OP_NONE, REG_D},                // 0x54
-    {"LD D, L", OP_NONE, REG_D},                // 0x55
-    {"LD D, (HL)", OP_NONE, REG_D},             // 0x56
-    {"LD D, A", OP_NONE, REG_D},                // 0x57
-    {"LD E, B", OP_NONE, REG_E},                // 0x58
-    {"LD E, C", OP_NONE, REG_E},                // 0x59
-    {"LD E, D", OP_NONE, REG_E},                // 0x5A
-    {"LD E, E", OP_NONE, REG_E},                // 0x5B
-    {"LD E, H", OP_NONE, REG_E},                // 0x5C
-    {"LD E, L", OP_NONE, REG_E},                // 0x5D
-    {"LD E, (HL)", OP_NONE, REG_E},             // 0x5E
-    {"LD E, A", OP_NONE, REG_E},                // 0x5F
-    {"LD H, B", OP_NONE, REG_H},                // 0x60
-    {"LD H, C", OP_NONE, REG_H},                // 0x61
-    {"LD H, D", OP_NONE, REG_H},                // 0x62
-    {"LD H, E", OP_NONE, REG_H},                // 0x63
-    {"LD H, H", OP_NONE, REG_H},                // 0x64
-    {"LD H, L", OP_NONE, REG_H},                // 0x65
-    {"LD H, (HL)", OP_NONE, REG_H},             // 0x66
-    {"LD H, A", OP_NONE, REG_H},                // 0x67
-    {"LD L, B", OP_NONE, REG_L},                // 0x68
-    {"LD L, C", OP_NONE, REG_L},                // 0x69
-    {"LD L, D", OP_NONE, REG_L},                // 0x6A
-    {"LD L, E", OP_NONE, REG_L},                // 0x6B
-    {"LD L, H", OP_NONE, REG_L},                // 0x6C
-    {"LD L, L", OP_NONE, REG_L},                // 0x6D
-    {"LD L, (HL)", OP_NONE, REG_L},             // 0x6E
-    {"LD L, A", OP_NONE, REG_L},                // 0x6F
-    {"LD (HL), B", OP_NONE, REG_HL},            // 0x70
-    {"LD (HL), C", OP_NONE, REG_HL},            // 0x71
-    {"LD (HL), D", OP_NONE, REG_HL},            // 0x72
-    {"LD (HL), E", OP_NONE, REG_HL},            // 0x73
-    {"LD (HL), H", OP_NONE, REG_HL},            // 0x74
-    {"LD (HL), L", OP_NONE, REG_HL},            // 0x75
-    {"HALT", OP_NONE, REG_UNUSED},              // 0x76
-    {"LD (HL), A", OP_NONE, REG_HL},            // 0x77
-    {"LD A, B", OP_NONE, REG_A},                // 0x78
-    {"LD A, C", OP_NONE, REG_A},                // 0x79
-    {"LD A, D", OP_NONE, REG_A},                // 0x7A
-    {"LD A, E", OP_NONE, REG_A},                // 0x7B
-    {"LD A, H", OP_NONE, REG_A},                // 0x7C
-    {"LD A, L", OP_NONE, REG_A},                // 0x7D
-    {"LD A, (HL)", OP_NONE, REG_A},             // 0x7E
-    {"LD A, A", OP_NONE, REG_A},                // 0x7F
-    {"ADD A, B", OP_NONE, REG_A},               // 0x80
-    {"ADD A, C", OP_NONE, REG_A},               // 0x81
-    {"ADD A, D", OP_NONE, REG_A},               // 0x82
-    {"ADD A, E", OP_NONE, REG_A},               // 0x83
-    {"ADD A, H", OP_NONE, REG_A},               // 0x84
-    {"ADD A, L", OP_NONE, REG_A},               // 0x85
-    {"ADD A, (HL)", OP_NONE, REG_A},            // 0x86
-    {"ADD A, A", OP_NONE, REG_A},               // 0x87
-    {"ADC A, B", OP_NONE, REG_A},               // 0x88
-    {"ADC A, C", OP_NONE, REG_A},               // 0x89
-    {"ADC A, D", OP_NONE, REG_A},               // 0x8A
-    {"ADC A, E", OP_NONE, REG_A},               // 0x8B
-    {"ADC A, H", OP_NONE, REG_A},               // 0x8C
-    {"ADC A, L", OP_NONE, REG_A},               // 0x8D
-    {"ADC A, (HL)", OP_NONE, REG_A},            // 0x8E
-    {"ADC A, A", OP_NONE, REG_A},               // 0x8F
-    {"SUB B", OP_NONE, REG_A},                  // 0x90
-    {"SUB C", OP_NONE, REG_A},                  // 0x91
-    {"SUB D", OP_NONE, REG_A},                  // 0x92
-    {"SUB E", OP_NONE, REG_A},                  // 0x93
-    {"SUB H", OP_NONE, REG_A},                  // 0x94
-    {"SUB L", OP_NONE, REG_A},                  // 0x95
-    {"SUB (HL)", OP_NONE, REG_A},               // 0x96
-    {"SUB A", OP_NONE, REG_A},                  // 0x97
-    {"SBC A, B", OP_NONE, REG_A},               // 0x98
-    {"SBC A, C", OP_NONE, REG_A},               // 0x99
-    {"SBC A, D", OP_NONE, REG_A},               // 0x9A
-    {"SBC A, E", OP_NONE, REG_A},               // 0x9B
-    {"SBC A, H", OP_NONE, REG_A},               // 0x9C
-    {"SBC A, L", OP_NONE, REG_A},               // 0x9D
-    {"SBC A, (HL)", OP_NONE, REG_A},            // 0x9E
-    {"SBC A, A", OP_NONE, REG_A},               // 0x9F
-    {"AND B", OP_NONE, REG_A},                  // 0xA0
-    {"AND C", OP_NONE, REG_A},                  // 0xA1
-    {"AND D", OP_NONE, REG_A},                  // 0xA2
-    {"AND E", OP_NONE, REG_A},                  // 0xA3
-    {"AND H", OP_NONE, REG_A},                  // 0xA4
-    {"AND L", OP_NONE, REG_A},                  // 0xA5
-    {"AND (HL)", OP_NONE, REG_A},               // 0xA6
-    {"AND A", OP_NONE, REG_A},                  // 0xA7
-    {"XOR B", OP_NONE, REG_A},                  // 0xA8
-    {"XOR C", OP_NONE, REG_A},                  // 0xA9
-    {"XOR D", OP_NONE, REG_A},                  // 0xAA
-    {"XOR E", OP_NONE, REG_A},                  // 0xAB
-    {"XOR H", OP_NONE, REG_A},                  // 0xAC
-    {"XOR L", OP_NONE, REG_A},                  // 0xAD
-    {"XOR (HL)", OP_NONE, REG_A},               // 0xAE
-    {"XOR A", OP_NONE, REG_A},                  // 0xAF
-    {"OR B", OP_NONE, REG_A},                   // 0xB0
-    {"OR C", OP_NONE, REG_A | REG_F},           // 0xB1
-    {"OR D", OP_NONE, REG_A},                   // 0xB2
-    {"OR E", OP_NONE, REG_A},                   // 0xB3
-    {"OR H", OP_NONE, REG_A},                   // 0xB4
-    {"OR L", OP_NONE, REG_A},                   // 0xB5
-    {"OR (HL)", OP_NONE, REG_A},                // 0xB6
-    {"OR A", OP_NONE, REG_A},                   // 0xB7
-    {"CP B", OP_NONE, REG_A},                   // 0xB8
-    {"CP C", OP_NONE, REG_A},                   // 0xB9
-    {"CP D", OP_NONE, REG_A},                   // 0xBA
-    {"CP E", OP_NONE, REG_A},                   // 0xBB
-    {"CP H", OP_NONE, REG_A},                   // 0xBC
-    {"CP L", OP_NONE, REG_A},                   // 0xBD
-    {"CP (HL)", OP_NONE, REG_A},                // 0xBE
-    {"CP A", OP_NONE, REG_A},                   // 0xBF
-    {"RET NZ", OP_NONE, REG_UNUSED},            // 0xC0
-    {"POP BC", OP_NONE, REG_UNUSED},            // 0xC1
-    {"JP NZ, $%04X", OP_IMM16, REG_UNUSED},     // 0xC2
-    {"JP $%04X", OP_IMM16, REG_UNUSED},         // 0xC3
-    {"CALL NZ, $%04X", OP_IMM16, REG_UNUSED},   // 0xC4
-    {"PUSH BC", OP_NONE, REG_SP | REG_BC},      // 0xC5
-    {"ADD A, $%02X", OP_IMM8, REG_A},           // 0xC6
-    {"RST $00", OP_NONE, REG_UNUSED},           // 0xC7
-    {"RET Z", OP_NONE, REG_UNUSED},             // 0xC8
-    {"RET", OP_NONE, REG_SP},                   // 0xC9
-    {"JP Z, $%04X", OP_IMM16, REG_UNUSED},      // 0xCA
-    {"PREFIX CB", OP_NONE, REG_UNUSED},         // 0xCB (should never be called)
-    {"CALL Z, $%04X", OP_IMM16, REG_UNUSED},    // 0xCC
-    {"CALL $%04X", OP_IMM16, REG_SP},           // 0xCD
-    {"ADC A, $%02X", OP_IMM8, REG_A},           // 0xCE
-    {"RST $08", OP_NONE, REG_UNUSED},           // 0xCF
-    {"RET NC", OP_NONE, REG_UNUSED},            // 0xD0
-    {"POP DE", OP_NONE, REG_UNUSED},            // 0xD1
-    {"JP NC, $%04X", OP_IMM16, REG_UNUSED},     // 0xD2
-    {"ILLEGAL $D3", OP_NONE, REG_UNUSED},       // 0xD3
-    {"CALL NC, $%04X", OP_IMM16, REG_UNUSED},   // 0xD4
-    {"PUSH DE", OP_NONE, REG_UNUSED},           // 0xD5
-    {"SUB $%02X", OP_IMM8, REG_A},              // 0xD6
-    {"RST $0010", OP_NONE, REG_UNUSED},         // 0xD7
-    {"RET C", OP_NONE, REG_UNUSED},             // 0xD8
-    {"RETI", OP_NONE, REG_UNUSED},              // 0xD9
-    {"JP C, $%04X", OP_IMM16, REG_UNUSED},      // 0xDA
-    {"ILLEGAL $DB", OP_NONE, REG_UNUSED},       // 0xDB
-    {"CALL C, $%04X", OP_IMM16, REG_UNUSED},    // 0xDC
-    {"ILLEGAL $DD", OP_NONE, REG_UNUSED},       // 0xDD
-    {"SBC A, $%02X", OP_IMM8, REG_A},           // 0xDE
-    {"RST $0018", OP_NONE, REG_UNUSED},         // 0xDF
-    {"LDH ($FF%02X), A", OP_IMM8, REG_UNUSED},  // 0xE0
-    {"POP HL", OP_NONE, REG_HL | REG_SP},       // 0xE1
-    {"LD (C), A", OP_NONE, REG_UNUSED},         // 0xE2
-    {"ILLEGAL $E3", OP_NONE, REG_UNUSED},       // 0xE3
-    {"ILLEGAL $E4", OP_NONE, REG_UNUSED},       // 0xE4
-    {"PUSH HL", OP_NONE, REG_HL | REG_SP},      // 0xE5
-    {"AND $%02X", OP_IMM8, REG_UNUSED},         // 0xE6
-    {"RST $0020", OP_NONE, REG_UNUSED},         // 0xE7
-    {"ADD SP, $%02X", OP_SIMM8, REG_SP},        // 0xE8
-    {"JP (HL)", OP_NONE, REG_UNUSED},           // 0xE9
-    {"LD ($%04X), A", OP_IMM16, REG_A | REG_MEM_IMM16},  // 0xEA
-    {"ILLEGAL $EB", OP_NONE, REG_UNUSED},                // 0xEB
-    {"ILLEGAL $EC", OP_NONE, REG_UNUSED},                // 0xEC
-    {"ILLEGAL $ED", OP_NONE, REG_UNUSED},                // 0xED
-    {"XOR $%02X", OP_IMM8, REG_A},                       // 0xEE
-    {"RST $0028", OP_NONE, REG_UNUSED},                  // 0xEF
-    {"LDH A, ($%02X)", OP_IMM8, REG_A},                  // 0xF0
-    {"POP AF", OP_NONE, REG_AF},                         // 0xF1
-    {"LD A, (C)", OP_NONE, REG_UNUSED},                  // 0xF2
-    {"DI", OP_NONE, REG_UNUSED},                         // 0xF3
-    {"ILLEGAL $F4", OP_NONE, REG_UNUSED},                // 0xF4
-    {"PUSH AF", OP_NONE, REG_UNUSED},                    // 0xF5
-    {"OR $%02X", OP_IMM8, REG_A},                        // 0xF6
-    {"RST $0030", OP_NONE, REG_UNUSED},                  // 0xF7
-    {"LD HL, SP+$%02X", OP_SIMM8, REG_UNUSED},           // 0xF8
-    {"LD SP, HL", OP_NONE, REG_UNUSED},                  // 0xF9
-    {"LD A, ($%04X)", OP_IMM16, REG_A},                  // 0xFA
-    {"EI", OP_NONE, REG_UNUSED},                         // 0xFB
-    {"ILLEGAL $FC", OP_NONE, REG_UNUSED},                // 0xFC
-    {"ILLEGAL $FD", OP_NONE, REG_UNUSED},                // 0xFD
-    {"CP $%02X", OP_IMM8, REG_UNUSED},                   // 0xFE
-    {"RST $0038", OP_NONE, REG_UNUSED}                   // 0xFF
+    {"NOP", OP_NONE, REG_UNUSED},             /* 0x00 */
+    {"LD BC, $%04X", OP_IMM16, REG_BC},       /* 0x01 */
+    {"LD (BC), A", OP_NONE, REG_BC},          /* 0x02 */
+    {"INC BC", OP_NONE, REG_BC},              /* 0x03 */
+    {"INC B", OP_NONE, REG_B},                /* 0x04 */
+    {"DEC B", OP_NONE, REG_B},                /* 0x05 */
+    {"LD B, $%02X", OP_IMM8, REG_B},          /* 0x06 */
+    {"RLCA", OP_NONE, REG_UNUSED},            /* 0x07 */
+    {"LD ($%04X), SP", OP_IMM16, REG_UNUSED}, /* 0x08 */
+    {"ADD HL, BC", OP_NONE, REG_UNUSED},      /* 0x09 */
+    {"LD A, (BC)", OP_NONE, REG_BC},          /* 0x0A */
+    {"DEC BC", OP_NONE, REG_BC},              /* 0x0B */
+    {"INC C", OP_NONE, REG_C},                /* 0x0C */
+    {"DEC C", OP_NONE, REG_C},                /* 0x0D */
+    {"LD C, $%02X", OP_IMM8, REG_C},          /* 0x0E */
+    {"RRCA", OP_NONE, REG_UNUSED},            /* 0x0F */
+    {"STOP", OP_NONE, REG_UNUSED},            /* 0x10 */
+    {"LD DE, $%04X", OP_IMM16, REG_DE},       /* 0x11 */
+    {"LD (DE), A", OP_NONE, REG_A | REG_DE},  /* 0x12 */
+    {"INC DE", OP_NONE, REG_DE},              /* 0x13 */
+    {"INC D", OP_NONE, REG_D | REG_F},        /* 0x14 */
+    {"DEC D", OP_NONE, REG_D},                /* 0x15 */
+    {"LD D, $%02X", OP_IMM8, REG_D},          /* 0x16 */
+    {"RLA", OP_NONE, REG_UNUSED},             /* 0x17 */
+    {"JR $%04X", OP_SIMM8, REG_UNUSED},       /* 0x18 */
+    {"ADD HL, DE", OP_NONE, REG_UNUSED},      /* 0x19 */
+    {"LD A, (DE)", OP_NONE, REG_DE},          /* 0x1A */
+    {"DEC DE", OP_NONE, REG_DE},              /* 0x1B */
+    {"INC E", OP_NONE, REG_E | REG_F},        /* 0x1C */
+    {"DEC E", OP_NONE, REG_E},                /* 0x1D */
+    {"LD E, $%02X", OP_IMM8, REG_E},          /* 0x1E */
+    {"RRA", OP_NONE, REG_A | REG_F},          /* 0x1F */
+    {"JR NZ, $%04X", OP_SIMM8, REG_UNUSED},   /* 0x20 */
+    {"LD HL, $%04X", OP_IMM16, REG_HL},       /* 0x21 */
+    {"LDI (HL), A", OP_NONE, REG_HL},         /* 0x22 */
+    {"INC HL", OP_NONE, REG_HL},              /* 0x23 */
+    {"INC H", OP_NONE, REG_H},                /* 0x24 */
+    {"DEC H", OP_NONE, REG_H},                /* 0x25 */
+    {"LD H, $%02X", OP_IMM8, REG_H},          /* 0x26 */
+    {"DAA", OP_NONE, REG_A},                  /* 0x27 */
+    {"JR Z, $%04X", OP_SIMM8, REG_UNUSED},    /* 0x28 */
+    {"ADD HL, HL", OP_NONE, REG_HL | REG_F},  /* 0x29 */
+    {"LDI A, (HL)", OP_NONE, REG_A | REG_HL}, /* 0x2A */
+    {"DEC HL", OP_NONE, REG_HL},              /* 0x2B */
+    {"INC L", OP_NONE, REG_L},                /* 0x2C */
+    {"DEC L", OP_NONE, REG_L},                /* 0x2D */
+    {"LD L, $%02X", OP_IMM8, REG_L},          /* 0x2E */
+    {"CPL", OP_NONE, REG_UNUSED},             /* 0x2F */
+    {"JR NC, $%04X", OP_SIMM8, REG_UNUSED},   /* 0x30 */
+    {"LD SP, $%04X", OP_IMM16, REG_SP},       /* 0x31 */
+    {"LDD (HL), A", OP_NONE, REG_HL},         /* 0x32 */
+    {"INC SP", OP_NONE, REG_SP},              /* 0x33 */
+    {"INC (HL)", OP_NONE, REG_HL_MEM},        /* 0x34 */
+    {"DEC (HL)", OP_NONE, REG_HL_MEM},        /* 0x35 */
+    {"LD (HL), $%02X", OP_IMM8, REG_HL_MEM},  /* 0x36 */
+    {"SCF", OP_NONE, REG_UNUSED},             /* 0x37 */
+    {"JR C, $%04X", OP_SIMM8, REG_UNUSED},    /* 0x38 */
+    {"ADD HL, SP", OP_NONE, REG_UNUSED},      /* 0x39 */
+    {"LDD, A, (HL)", OP_NONE, REG_HL},        /* 0x3A */
+    {"DEC SP", OP_NONE, REG_UNUSED},          /* 0x3B */
+    {"INC A", OP_NONE, REG_A},                /* 0x3C */
+    {"DEC A", OP_NONE, REG_A},                /* 0x3D */
+    {"LD A, $%02X", OP_IMM8, REG_A},          /* 0x3E */
+    {"CCF", OP_NONE, REG_UNUSED},             /* 0x3F */
+    {"LD B, B", OP_NONE, REG_B},              /* 0x40 */
+    {"LD B, C", OP_NONE, REG_B},              /* 0x41 */
+    {"LD B, D", OP_NONE, REG_B},              /* 0x42 */
+    {"LD B, E", OP_NONE, REG_B},              /* 0x43 */
+    {"LD B, H", OP_NONE, REG_B},              /* 0x44 */
+    {"LD B, L", OP_NONE, REG_B},              /* 0x45 */
+    {"LD B, (HL)", OP_NONE, REG_B},           /* 0x46 */
+    {"LD B, A", OP_NONE, REG_B},              /* 0x47 */
+    {"LD C, B", OP_NONE, REG_C},              /* 0x48 */
+    {"LD C, C", OP_NONE, REG_C},              /* 0x49 */
+    {"LD C, D", OP_NONE, REG_C},              /* 0x4A */
+    {"LD C, E", OP_NONE, REG_C},              /* 0x4B */
+    {"LD C, H", OP_NONE, REG_C},              /* 0x4C */
+    {"LD C, L", OP_NONE, REG_C},              /* 0x4D */
+    {"LD C, (HL)", OP_NONE, REG_C},           /* 0x4E */
+    {"LD C, A", OP_NONE, REG_C},              /* 0x4F */
+    {"LD D, B", OP_NONE, REG_D},              /* 0x50 */
+    {"LD D, C", OP_NONE, REG_D},              /* 0x51 */
+    {"LD D, D", OP_NONE, REG_D},              /* 0x52 */
+    {"LD D, E", OP_NONE, REG_D},              /* 0x53 */
+    {"LD D, H", OP_NONE, REG_D},              /* 0x54 */
+    {"LD D, L", OP_NONE, REG_D},              /* 0x55 */
+    {"LD D, (HL)", OP_NONE, REG_D},           /* 0x56 */
+    {"LD D, A", OP_NONE, REG_D},              /* 0x57 */
+    {"LD E, B", OP_NONE, REG_E},              /* 0x58 */
+    {"LD E, C", OP_NONE, REG_E},              /* 0x59 */
+    {"LD E, D", OP_NONE, REG_E},              /* 0x5A */
+    {"LD E, E", OP_NONE, REG_E},              /* 0x5B */
+    {"LD E, H", OP_NONE, REG_E},              /* 0x5C */
+    {"LD E, L", OP_NONE, REG_E},              /* 0x5D */
+    {"LD E, (HL)", OP_NONE, REG_E},           /* 0x5E */
+    {"LD E, A", OP_NONE, REG_E},              /* 0x5F */
+    {"LD H, B", OP_NONE, REG_H},              /* 0x60 */
+    {"LD H, C", OP_NONE, REG_H},              /* 0x61 */
+    {"LD H, D", OP_NONE, REG_H},              /* 0x62 */
+    {"LD H, E", OP_NONE, REG_H},              /* 0x63 */
+    {"LD H, H", OP_NONE, REG_H},              /* 0x64 */
+    {"LD H, L", OP_NONE, REG_H},              /* 0x65 */
+    {"LD H, (HL)", OP_NONE, REG_H},           /* 0x66 */
+    {"LD H, A", OP_NONE, REG_H},              /* 0x67 */
+    {"LD L, B", OP_NONE, REG_L},              /* 0x68 */
+    {"LD L, C", OP_NONE, REG_L},              /* 0x69 */
+    {"LD L, D", OP_NONE, REG_L},              /* 0x6A */
+    {"LD L, E", OP_NONE, REG_L},              /* 0x6B */
+    {"LD L, H", OP_NONE, REG_L},              /* 0x6C */
+    {"LD L, L", OP_NONE, REG_L},              /* 0x6D */
+    {"LD L, (HL)", OP_NONE, REG_L},           /* 0x6E */
+    {"LD L, A", OP_NONE, REG_L},              /* 0x6F */
+    {"LD (HL), B", OP_NONE, REG_HL},          /* 0x70 */
+    {"LD (HL), C", OP_NONE, REG_HL},          /* 0x71 */
+    {"LD (HL), D", OP_NONE, REG_HL},          /* 0x72 */
+    {"LD (HL), E", OP_NONE, REG_HL},          /* 0x73 */
+    {"LD (HL), H", OP_NONE, REG_HL},          /* 0x74 */
+    {"LD (HL), L", OP_NONE, REG_HL},          /* 0x75 */
+    {"HALT", OP_NONE, REG_UNUSED},            /* 0x76 */
+    {"LD (HL), A", OP_NONE, REG_HL},          /* 0x77 */
+    {"LD A, B", OP_NONE, REG_A},              /* 0x78 */
+    {"LD A, C", OP_NONE, REG_A},              /* 0x79 */
+    {"LD A, D", OP_NONE, REG_A},              /* 0x7A */
+    {"LD A, E", OP_NONE, REG_A},              /* 0x7B */
+    {"LD A, H", OP_NONE, REG_A},              /* 0x7C */
+    {"LD A, L", OP_NONE, REG_A},              /* 0x7D */
+    {"LD A, (HL)", OP_NONE, REG_A},           /* 0x7E */
+    {"LD A, A", OP_NONE, REG_A},              /* 0x7F */
+    {"ADD A, B", OP_NONE, REG_A},             /* 0x80 */
+    {"ADD A, C", OP_NONE, REG_A},             /* 0x81 */
+    {"ADD A, D", OP_NONE, REG_A},             /* 0x82 */
+    {"ADD A, E", OP_NONE, REG_A},             /* 0x83 */
+    {"ADD A, H", OP_NONE, REG_A},             /* 0x84 */
+    {"ADD A, L", OP_NONE, REG_A},             /* 0x85 */
+    {"ADD A, (HL)", OP_NONE, REG_A},          /* 0x86 */
+    {"ADD A, A", OP_NONE, REG_A},             /* 0x87 */
+    {"ADC A, B", OP_NONE, REG_A},             /* 0x88 */
+    {"ADC A, C", OP_NONE, REG_A},             /* 0x89 */
+    {"ADC A, D", OP_NONE, REG_A},             /* 0x8A */
+    {"ADC A, E", OP_NONE, REG_A},             /* 0x8B */
+    {"ADC A, H", OP_NONE, REG_A},             /* 0x8C */
+    {"ADC A, L", OP_NONE, REG_A},             /* 0x8D */
+    {"ADC A, (HL)", OP_NONE, REG_A},          /* 0x8E */
+    {"ADC A, A", OP_NONE, REG_A},             /* 0x8F */
+    {"SUB B", OP_NONE, REG_A},                /* 0x90 */
+    {"SUB C", OP_NONE, REG_A},                /* 0x91 */
+    {"SUB D", OP_NONE, REG_A},                /* 0x92 */
+    {"SUB E", OP_NONE, REG_A},                /* 0x93 */
+    {"SUB H", OP_NONE, REG_A},                /* 0x94 */
+    {"SUB L", OP_NONE, REG_A},                /* 0x95 */
+    {"SUB (HL)", OP_NONE, REG_A},             /* 0x96 */
+    {"SUB A", OP_NONE, REG_A},                /* 0x97 */
+    {"SBC A, B", OP_NONE, REG_A},             /* 0x98 */
+    {"SBC A, C", OP_NONE, REG_A},             /* 0x99 */
+    {"SBC A, D", OP_NONE, REG_A},             /* 0x9A */
+    {"SBC A, E", OP_NONE, REG_A},             /* 0x9B */
+    {"SBC A, H", OP_NONE, REG_A},             /* 0x9C */
+    {"SBC A, L", OP_NONE, REG_A},             /* 0x9D */
+    {"SBC A, (HL)", OP_NONE, REG_A},          /* 0x9E */
+    {"SBC A, A", OP_NONE, REG_A},             /* 0x9F */
+    {"AND B", OP_NONE, REG_A},                /* 0xA0 */
+    {"AND C", OP_NONE, REG_A},                /* 0xA1 */
+    {"AND D", OP_NONE, REG_A},                /* 0xA2 */
+    {"AND E", OP_NONE, REG_A},                /* 0xA3 */
+    {"AND H", OP_NONE, REG_A},                /* 0xA4 */
+    {"AND L", OP_NONE, REG_A},                /* 0xA5 */
+    {"AND (HL)", OP_NONE, REG_A},             /* 0xA6 */
+    {"AND A", OP_NONE, REG_A},                /* 0xA7 */
+    {"XOR B", OP_NONE, REG_A},                /* 0xA8 */
+    {"XOR C", OP_NONE, REG_A},                /* 0xA9 */
+    {"XOR D", OP_NONE, REG_A},                /* 0xAA */
+    {"XOR E", OP_NONE, REG_A},                /* 0xAB */
+    {"XOR H", OP_NONE, REG_A},                /* 0xAC */
+    {"XOR L", OP_NONE, REG_A},                /* 0xAD */
+    {"XOR (HL)", OP_NONE, REG_A},             /* 0xAE */
+    {"XOR A", OP_NONE, REG_A},                /* 0xAF */
+    {"OR B", OP_NONE, REG_A},                 /* 0xB0 */
+    {"OR C", OP_NONE, REG_A | REG_F},         /* 0xB1 */
+    {"OR D", OP_NONE, REG_A},                 /* 0xB2 */
+    {"OR E", OP_NONE, REG_A},                 /* 0xB3 */
+    {"OR H", OP_NONE, REG_A},                 /* 0xB4 */
+    {"OR L", OP_NONE, REG_A},                 /* 0xB5 */
+    {"OR (HL)", OP_NONE, REG_A},              /* 0xB6 */
+    {"OR A", OP_NONE, REG_A},                 /* 0xB7 */
+    {"CP B", OP_NONE, REG_A},                 /* 0xB8 */
+    {"CP C", OP_NONE, REG_A},                 /* 0xB9 */
+    {"CP D", OP_NONE, REG_A},                 /* 0xBA */
+    {"CP E", OP_NONE, REG_A},                 /* 0xBB */
+    {"CP H", OP_NONE, REG_A},                 /* 0xBC */
+    {"CP L", OP_NONE, REG_A},                 /* 0xBD */
+    {"CP (HL)", OP_NONE, REG_A},              /* 0xBE */
+    {"CP A", OP_NONE, REG_A},                 /* 0xBF */
+    {"RET NZ", OP_NONE, REG_UNUSED},          /* 0xC0 */
+    {"POP BC", OP_NONE, REG_UNUSED},          /* 0xC1 */
+    {"JP NZ, $%04X", OP_IMM16, REG_UNUSED},   /* 0xC2 */
+    {"JP $%04X", OP_IMM16, REG_UNUSED},       /* 0xC3 */
+    {"CALL NZ, $%04X", OP_IMM16, REG_UNUSED}, /* 0xC4 */
+    {"PUSH BC", OP_NONE, REG_SP | REG_BC},    /* 0xC5 */
+    {"ADD A, $%02X", OP_IMM8, REG_A},         /* 0xC6 */
+    {"RST $00", OP_NONE, REG_UNUSED},         /* 0xC7 */
+    {"RET Z", OP_NONE, REG_UNUSED},           /* 0xC8 */
+    {"RET", OP_NONE, REG_SP},                 /* 0xC9 */
+    {"JP Z, $%04X", OP_IMM16, REG_UNUSED},    /* 0xCA */
+    {"PREFIX CB", OP_NONE, REG_UNUSED},      /* 0xCB (should never be called) */
+    {"CALL Z, $%04X", OP_IMM16, REG_UNUSED}, /* 0xCC */
+    {"CALL $%04X", OP_IMM16, REG_SP},        /* 0xCD */
+    {"ADC A, $%02X", OP_IMM8, REG_A},        /* 0xCE */
+    {"RST $08", OP_NONE, REG_UNUSED},        /* 0xCF */
+    {"RET NC", OP_NONE, REG_UNUSED},         /* 0xD0 */
+    {"POP DE", OP_NONE, REG_UNUSED},         /* 0xD1 */
+    {"JP NC, $%04X", OP_IMM16, REG_UNUSED},  /* 0xD2 */
+    {"ILLEGAL $D3", OP_NONE, REG_UNUSED},    /* 0xD3 */
+    {"CALL NC, $%04X", OP_IMM16, REG_UNUSED},           /* 0xD4 */
+    {"PUSH DE", OP_NONE, REG_UNUSED},                   /* 0xD5 */
+    {"SUB $%02X", OP_IMM8, REG_A},                      /* 0xD6 */
+    {"RST $0010", OP_NONE, REG_UNUSED},                 /* 0xD7 */
+    {"RET C", OP_NONE, REG_UNUSED},                     /* 0xD8 */
+    {"RETI", OP_NONE, REG_UNUSED},                      /* 0xD9 */
+    {"JP C, $%04X", OP_IMM16, REG_UNUSED},              /* 0xDA */
+    {"ILLEGAL $DB", OP_NONE, REG_UNUSED},               /* 0xDB */
+    {"CALL C, $%04X", OP_IMM16, REG_UNUSED},            /* 0xDC */
+    {"ILLEGAL $DD", OP_NONE, REG_UNUSED},               /* 0xDD */
+    {"SBC A, $%02X", OP_IMM8, REG_A},                   /* 0xDE */
+    {"RST $0018", OP_NONE, REG_UNUSED},                 /* 0xDF */
+    {"LDH ($FF%02X), A", OP_IMM8, REG_UNUSED},          /* 0xE0 */
+    {"POP HL", OP_NONE, REG_HL | REG_SP},               /* 0xE1 */
+    {"LD (C), A", OP_NONE, REG_UNUSED},                 /* 0xE2 */
+    {"ILLEGAL $E3", OP_NONE, REG_UNUSED},               /* 0xE3 */
+    {"ILLEGAL $E4", OP_NONE, REG_UNUSED},               /* 0xE4 */
+    {"PUSH HL", OP_NONE, REG_HL | REG_SP},              /* 0xE5 */
+    {"AND $%02X", OP_IMM8, REG_UNUSED},                 /* 0xE6 */
+    {"RST $0020", OP_NONE, REG_UNUSED},                 /* 0xE7 */
+    {"ADD SP, $%02X", OP_SIMM8, REG_SP},                /* 0xE8 */
+    {"JP (HL)", OP_NONE, REG_UNUSED},                   /* 0xE9 */
+    {"LD ($%04X), A", OP_IMM16, REG_A | REG_MEM_IMM16}, /* 0xEA */
+    {"ILLEGAL $EB", OP_NONE, REG_UNUSED},               /* 0xEB */
+    {"ILLEGAL $EC", OP_NONE, REG_UNUSED},               /* 0xEC */
+    {"ILLEGAL $ED", OP_NONE, REG_UNUSED},               /* 0xED */
+    {"XOR $%02X", OP_IMM8, REG_A},                      /* 0xEE */
+    {"RST $0028", OP_NONE, REG_UNUSED},                 /* 0xEF */
+    {"LDH A, ($%02X)", OP_IMM8, REG_A},                 /* 0xF0 */
+    {"POP AF", OP_NONE, REG_AF},                        /* 0xF1 */
+    {"LD A, (C)", OP_NONE, REG_UNUSED},                 /* 0xF2 */
+    {"DI", OP_NONE, REG_UNUSED},                        /* 0xF3 */
+    {"ILLEGAL $F4", OP_NONE, REG_UNUSED},               /* 0xF4 */
+    {"PUSH AF", OP_NONE, REG_UNUSED},                   /* 0xF5 */
+    {"OR $%02X", OP_IMM8, REG_A},                       /* 0xF6 */
+    {"RST $0030", OP_NONE, REG_UNUSED},                 /* 0xF7 */
+    {"LD HL, SP+$%02X", OP_SIMM8, REG_UNUSED},          /* 0xF8 */
+    {"LD SP, HL", OP_NONE, REG_UNUSED},                 /* 0xF9 */
+    {"LD A, ($%04X)", OP_IMM16, REG_A},                 /* 0xFA */
+    {"EI", OP_NONE, REG_UNUSED},                        /* 0xFB */
+    {"ILLEGAL $FC", OP_NONE, REG_UNUSED},               /* 0xFC */
+    {"ILLEGAL $FD", OP_NONE, REG_UNUSED},               /* 0xFD */
+    {"CP $%02X", OP_IMM8, REG_UNUSED},                  /* 0xFE */
+    {"RST $0038", OP_NONE, REG_UNUSED}                  /* 0xFF */
 };
 
 static const struct disasm_data cb_opcodes[256] = {

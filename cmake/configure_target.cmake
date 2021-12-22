@@ -16,12 +16,12 @@ function(yagbe_configure_c_target TARGET_NAME)
   set_target_properties(${TARGET_NAME} PROPERTIES
                         C_STANDARD 90
 			C_STANDARD_REQUIRED YES
-                        C_EXTENSIONS ON)
+			C_EXTENSIONS OFF)
 
   if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-    if (CMAKE_C_COMPILER_ID MATCHES "Clang" OR
-        CMAKE_C_COMPILER_ID MATCHES "GCC")
-      set(MAIN_COMPILER_FLAGS "-Wall;-Werror;-Wextra;-Wno-format-nonliteral")
+    if (CMAKE_C_COMPILER_ID STREQUAL "Clang" OR
+        CMAKE_C_COMPILER_ID STREQUAL "GNU")
+      set(MAIN_COMPILER_FLAGS "-Wall;-pedantic;-pedantic-errors;-Werror;-Wextra;-Wno-format-nonliteral")
     endif()
   endif()
 
