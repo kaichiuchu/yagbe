@@ -18,6 +18,7 @@ set(PRIVATE_SRCS private/apu.c
                  private/cpu.c
                  private/disasm.c
                  private/ppu.c
+                 private/sched.c
                  private/gb.c
                  private/timer.c)
 
@@ -32,6 +33,7 @@ set(PUBLIC_HDRS public/libyagbe/compat/compat_stdbool.h
                 public/libyagbe/disasm.h
                 public/libyagbe/gb.h
                 public/libyagbe/ppu.h
+                public/libyagbe/sched.h
                 public/libyagbe/timer.h)
 
 add_library(yagbecore STATIC ${PRIVATE_SRCS} ${PUBLIC_HDRS} ${PRIVATE_HDRS})

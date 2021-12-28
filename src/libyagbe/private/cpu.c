@@ -1121,6 +1121,33 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       return;
 
     case OP_DAA:
+      /* Because there's no good information on how DAA is implemented in the
+       * SM83, this implementation has been taken from
+       * https://forums.nesdev.org/viewtopic.php?f=20&t=15944
+       */
+      if (!(cpu->reg.af.byte.lo & FLAG_N)) {
+        if ((cpu->reg.af.byte.lo & FLAG_C) || cpu->reg.af.byte.hi > 0x99) {
+          cpu->reg.af.byte.hi += 0x60;
+          cpu->reg.af.byte.lo |= FLAG_C;
+        }
+
+        if ((cpu->reg.af.byte.lo & FLAG_H) || (cpu->reg.af.byte.hi & 0x0F) > 0x09) {
+          cpu->reg.af.byte.hi += 0x06;
+        }
+      } else {
+        if (cpu->reg.af.byte.lo & FLAG_C) {
+          cpu->reg.af.byte.hi -= 0x60;
+        }
+
+        if (cpu->reg.af.byte.lo & FLAG_H) {
+          cpu->reg.af.byte.hi -= 0x06;
+        }
+      }
+
+      cpu->reg.af.byte.lo =
+          set_zero_flag(cpu->reg.af.byte.lo, cpu->reg.af.byte.hi);
+      cpu->reg.af.byte.lo &= ~FLAG_H;
+
       return;
 
     case OP_JR_Z_SIMM8:

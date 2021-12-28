@@ -30,6 +30,7 @@
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef signed char int8_t;
+typedef unsigned long uintmax_t;
 
 #endif /* (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L) || \
            defined(__cplusplus) */

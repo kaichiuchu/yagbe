@@ -17,6 +17,7 @@
  */
 
 #include "libyagbe/gb.h"
+#include "libyagbe/sched.h"
 
 #include <assert.h>
 #include <stddef.h>
@@ -31,6 +32,7 @@ void libyagbe_system_init(struct libyagbe_system* const gb,
 
 void libyagbe_system_reset(struct libyagbe_system* const gb) {
   assert(gb != NULL);
+  libyagbe_sched_reset();
   libyagbe_cpu_reset(&gb->cpu);
 }
 

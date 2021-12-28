@@ -16,22 +16,29 @@
  * PERFORMANCE OF THIS SOFTWARE.
  */
 
-#ifndef LIBYAGBE_UTILITY_H
-#define LIBYAGBE_UTILITY_H
+#ifndef LIBYAGBE_SCHED_H
+#define LIBYAGBE_SCHED_H
 
-#include <string.h>
+typedef void (*libyagbe_sched_event_cb)(void* const userdata);
 
-#ifdef __cplusplus
-extern "C" {
-#endif /* __cplusplus */
+struct libyagbe_sched_event {
+  /** @brief When should this event be triggered? */
+  unsigned int expiry_time;
 
-/* Conditionally sets a bit or clears one without branching. */
-#define SET_BIT_IF(n, bit_mask, condition) n = (n & ~bit_mask) | (-(condition) & bit_mask)
+  /** What function should be called when the event has expired? */
+  libyagbe_sched_event_cb cb_func;
 
-#define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
+  void* userdata;
+};
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+void libyagbe_sched_insert(struct libyagbe_sched_event* const event);
 
-#endif /* LIBYAGBE_UTILITY_H */
+void libyagbe_sched_reset(void);
+
+/** @brief Advances the scheduler by 1 m-cycle.
+*
+* This function *must* be called once every m-cycle.
+*/
+void libyagbe_sched_step(void);
+
+#endif /* LIBYAGBE_SCHED_H */

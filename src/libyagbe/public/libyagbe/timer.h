@@ -28,7 +28,16 @@ extern "C" {
 enum libyagbe_timer_io_registers { LIBYAGBE_TIMER_IO_TAC = 0x7 };
 
 struct libyagbe_timer {
+  uint8_t tima;
   uint8_t tac;
+  uint8_t tma;
 };
+
+void libyagbe_timer_handle_tac(struct libyagbe_timer* const timer,
+                               const uint8_t tac);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* LIBYAGBE_TIMER_H */

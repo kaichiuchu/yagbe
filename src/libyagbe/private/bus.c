@@ -17,14 +17,19 @@
  */
 
 #include "libyagbe/bus.h"
+#include "libyagbe/compat/compat_stdbool.h"
 
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 
+#include "libyagbe/sched.h"
+
 uint8_t libyagbe_bus_read_memory(struct libyagbe_bus* const bus,
                                  const uint16_t address) {
   assert(bus != NULL);
+
+  libyagbe_sched_step();
 
   switch (address >> 12) {
     case 0x0:
@@ -106,18 +111,21 @@ uint8_t libyagbe_bus_read_memory(struct libyagbe_bus* const bus,
 
 void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
                                const uint16_t address, const uint8_t data) {
+  bool good;
   assert(bus != NULL);
+
+  good = true;
 
   switch (address >> 12) {
     case 0x8:
     case 0x9:
       bus->ppu.vram[address - 0x8000] = data;
-      return;
+      break;
 
     case 0xC:
     case 0xD:
       bus->wram[address - 0xC000] = data;
-      return;
+      break;
 
     case 0xF:
       switch ((address >> 8) & 0x0F) {
@@ -127,40 +135,42 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
               switch (address & 0x000F) {
                 case 1:
                   putchar(data);
-                  return;
+                  break;
 
                 case 2:
-                  return;
+                  break;
 
                 case LIBYAGBE_TIMER_IO_TAC:
-                  bus->timer.tac = data;
-                  return;
+                  libyagbe_timer_handle_tac(&bus->timer, data);
+                  break;
 
                 case LIBYAGBE_BUS_IO_IF:
                   bus->interrupt_flag = data;
-                  return;
+                  break;
 
                 default:
+                  good = false;
                   break;
               }
               break;
 
             case 0x1:
+              good = false;
               break;
 
             case 0x2:
               switch (address & 0x000F) {
                 case LIBYAGBE_APU_IO_NR50:
                   bus->apu.nr50 = data;
-                  return;
+                  break;
 
                 case LIBYAGBE_APU_IO_NR51:
                   bus->apu.nr51 = data;
-                  return;
+                  break;
 
                 case LIBYAGBE_APU_IO_NR52:
                   bus->apu.nr52 = data;
-                  return;
+                  break;
 
                 default:
                   break;
@@ -174,21 +184,22 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
               switch (address & 0x000F) {
                 case LIBYAGBE_PPU_IO_LCDC:
                   bus->ppu.lcdc = data;
-                  return;
+                  break;
 
                 case LIBYAGBE_PPU_IO_SCY:
                   bus->ppu.scy = data;
-                  return;
+                  break;
 
                 case LIBYAGBE_PPU_IO_SCX:
                   bus->ppu.scx = data;
-                  return;
+                  break;
 
                 case LIBYAGBE_PPU_IO_BGP:
                   bus->ppu.bgp = data;
-                  return;
+                  break;
 
                 default:
+                  good = false;
                   break;
               }
               break;
@@ -196,6 +207,7 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
             case 0x5:
             case 0x6:
             case 0x7:
+              good = false;
               break;
 
             case 0x8:
@@ -206,7 +218,7 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
             case 0xD:
             case 0xE:
               bus->hram[address - 0xFF80] = data;
-              return;
+              break;
 
             case 0xF:
               switch (address & 0x000F) {
@@ -225,29 +237,38 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
                 case 0xD:
                 case 0xE:
                   bus->hram[address - 0xFF80] = data;
-                  return;
+                  break;
 
                 case LIBYAGBE_BUS_IO_IE:
                   bus->interrupt_enable = data;
-                  return;
+                  break;
 
                 default:
+                  good = false;
                   break;
               }
               break;
 
             default:
+              good = false;
               break;
           }
           break;
 
         default:
+          good = false;
           break;
       }
       break;
 
     default:
+      good = false;
       break;
   }
-  printf("Unhandled write: $%04X <- $%02X\n", address, data);
+
+  libyagbe_sched_step();
+
+  if (!good) {
+    printf("Unhandled write: $%04X <- $%02X\n", address, data);
+  }
 }

@@ -17,3 +17,60 @@
  */
 
 #include "libyagbe/timer.h"
+
+#include <assert.h>
+#include <stddef.h>
+
+#include "libyagbe/sched.h"
+
+static const int timing[4] = {1024, 16, 64, 256};
+enum tac_bits { TAC_ENABLED = 1 << 0 };
+
+static void handle_timer_update(void* const userdata) {
+  struct libyagbe_timer* timer = (struct libyagbe_timer*)userdata;
+
+  struct libyagbe_sched_event event;
+  event.expiry_time = timing[timer->tac & 0x03];
+  event.cb_func = &handle_timer_update;
+  event.userdata = timer;
+
+  if (timer->tima == 0xFF) {
+    timer->tima = timer->tma;
+    return;
+  }
+  timer->tima++;
+}
+
+void libyagbe_timer_handle_tac(struct libyagbe_timer* const timer,
+                               const uint8_t tac) {
+  assert(timer != NULL);
+
+  /* Is the timer being enabled from a disabled state? */
+  if (!(timer->tac & TAC_ENABLED) && (tac & TAC_ENABLED)) {
+    /* The timer has now been enabled from a previously disabled state, schedule
+     * an event. */
+    struct libyagbe_sched_event event;
+
+    event.expiry_time = timing[tac & 0x03];
+    event.cb_func = &handle_timer_update;
+    event.userdata = timer;
+
+    libyagbe_sched_insert(&event);
+    timer->tac = tac;
+
+    return;
+  }
+
+  /* Is the timer being disabled from an enabled state? */
+  if ((timer->tac & TAC_ENABLED) && !(tac & TAC_ENABLED)) {
+    /* Delete all events related to the timer. */
+    /*libyagbe_sched_delete_events(timer);*/
+    timer->tac = tac;
+
+    return;
+  }
+  timer->tac = tac;
+
+  /* The timer is enabled, but the timing changed. */
+  /*libyagbe_sched_delete()*/
+}
