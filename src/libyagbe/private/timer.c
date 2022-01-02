@@ -23,8 +23,12 @@
 
 #include "libyagbe/sched.h"
 
-static const int timing[4] = {1024, 16, 64, 256};
-enum tac_bits { TAC_ENABLED = 1 << 0 };
+static const unsigned int timing[4] = {1024, 16, 64, 256};
+enum tac_bits { TAC_ENABLED = 1 << 2 };
+
+static uint8_t* interrupt_flag = NULL;
+
+enum interrupt_flags { FLAG_TIMER = 1 << 2 };
 
 static void handle_timer_update(void* const userdata) {
   struct libyagbe_timer* timer = (struct libyagbe_timer*)userdata;
@@ -36,9 +40,19 @@ static void handle_timer_update(void* const userdata) {
 
   if (timer->tima == 0xFF) {
     timer->tima = timer->tma;
-    return;
+    *interrupt_flag |= FLAG_TIMER;
+  } else {
+    timer->tima++;
   }
-  timer->tima++;
+
+  /* Don't schedule an event again if the timer is not enabled. */
+  if (timer->tac & TAC_ENABLED) {
+    libyagbe_sched_insert(&event);
+  }
+}
+
+void libyagbe_timer_set_interrupt_flag(uint8_t* const iflag) {
+  interrupt_flag = iflag;
 }
 
 void libyagbe_timer_handle_tac(struct libyagbe_timer* const timer,
@@ -66,11 +80,7 @@ void libyagbe_timer_handle_tac(struct libyagbe_timer* const timer,
     /* Delete all events related to the timer. */
     /*libyagbe_sched_delete_events(timer);*/
     timer->tac = tac;
-
     return;
   }
   timer->tac = tac;
-
-  /* The timer is enabled, but the timing changed. */
-  /*libyagbe_sched_delete()*/
 }

@@ -579,6 +579,88 @@ static struct current_disasm {
   int post_op_flags;
 } current_disasm;
 
+static uint8_t inspect_memory(struct libyagbe_bus* const bus,
+                              const uint16_t address) {
+  assert(bus != NULL);
+
+  switch (address >> 12) {
+    case 0x0:
+    case 0x1:
+    case 0x2:
+    case 0x3:
+    case 0x4:
+    case 0x5:
+    case 0x6:
+    case 0x7:
+      return bus->cart.data[address];
+
+    case 0xC:
+    case 0xD:
+      return bus->wram[address - 0xC000];
+
+    case 0xF:
+      switch ((address >> 8) & 0x0F) {
+        case 0xF:
+          switch ((address & 0x00FF) >> 4) {
+            case 0x0:
+            case 0x1:
+            case 0x2:
+            case 0x3:
+            case 0x4:
+            case 0x5:
+            case 0x6:
+            case 0x7:
+              break;
+
+            case 0x8:
+            case 0x9:
+            case 0xA:
+            case 0xB:
+            case 0xC:
+            case 0xD:
+            case 0xE:
+              return bus->hram[address - 0xFF80];
+
+            case 0xF:
+              switch (address & 0x000F) {
+                case 0x0:
+                case 0x1:
+                case 0x2:
+                case 0x3:
+                case 0x4:
+                case 0x5:
+                case 0x6:
+                case 0x7:
+                case 0x9:
+                case 0xA:
+                case 0xB:
+                case 0xC:
+                case 0xD:
+                case 0xE:
+                  return bus->hram[address - 0xFF80];
+
+                default:
+                  break;
+              }
+              break;
+
+            default:
+              break;
+          }
+          break;
+
+        default:
+          break;
+      }
+      break;
+
+    default:
+      break;
+  }
+  printf("Unhandled read: $%04X\n", address);
+  return 0xFF;
+}
+
 void libyagbe_disasm_prepare(const uint16_t pc,
                              struct libyagbe_bus* const bus) {
   uint8_t instruction;
@@ -588,10 +670,10 @@ void libyagbe_disasm_prepare(const uint16_t pc,
 
   memset(&current_disasm, 0, sizeof(current_disasm));
 
-  instruction = libyagbe_bus_read_memory(bus, pc);
+  instruction = inspect_memory(bus, pc);
 
   if (instruction == 0xCB) {
-    instruction = libyagbe_bus_read_memory(bus, pc + 1);
+    instruction = inspect_memory(bus, pc + 1);
     data = &cb_opcodes[instruction];
   } else {
     data = &main_opcodes[instruction];
@@ -603,22 +685,22 @@ void libyagbe_disasm_prepare(const uint16_t pc,
       break;
 
     case OP_IMM8: {
-      const uint8_t imm = libyagbe_bus_read_memory(bus, pc + 1);
+      const uint8_t imm = inspect_memory(bus, pc + 1);
       sprintf(current_disasm.disasm_result, data->format_str, imm);
 
       break;
     }
 
     case OP_IMM16: {
-      const uint8_t lo = libyagbe_bus_read_memory(bus, pc + 1);
-      const uint8_t hi = libyagbe_bus_read_memory(bus, pc + 2);
+      const uint8_t lo = inspect_memory(bus, pc + 1);
+      const uint8_t hi = inspect_memory(bus, pc + 2);
 
       sprintf(current_disasm.disasm_result, data->format_str, (hi << 8) | lo);
       break;
     }
 
     case OP_SIMM8: {
-      const int8_t imm = (int8_t)libyagbe_bus_read_memory(bus, pc + 1);
+      const int8_t imm = (int8_t)inspect_memory(bus, pc + 1);
 
       sprintf(current_disasm.disasm_result, data->format_str, pc + imm + 2);
       break;
@@ -704,11 +786,11 @@ char* libyagbe_disasm_execute(struct libyagbe_cpu* const cpu,
         case REG_MEM_IMM16: {
           const uint16_t npc = cpu->reg.pc - 2;
 
-          const uint8_t lo = libyagbe_bus_read_memory(bus, npc);
-          const uint8_t hi = libyagbe_bus_read_memory(bus, npc + 1);
+          const uint8_t lo = inspect_memory(bus, npc);
+          const uint8_t hi = inspect_memory(bus, npc + 1);
 
           const uint16_t address = (uint16_t)((hi << 8) | lo);
-          const uint8_t data = libyagbe_bus_read_memory(bus, address);
+          const uint8_t data = inspect_memory(bus, address);
 
           sprintf(buf, "[$%04X]=$%02X", address, data);
           break;

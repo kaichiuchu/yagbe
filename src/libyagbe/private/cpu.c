@@ -36,6 +36,7 @@
 
 #include "libyagbe/bus.h"
 #include "libyagbe/compat/compat_stdbool.h"
+#include "libyagbe/sched.h"
 #include "utility.h"
 
 /** Defines the flag bits for the Flag register. */
@@ -71,6 +72,11 @@ enum alu_flag {
 
   /** The ALU operation should forcibly clear the Zero flag. */
   ALU_CLEAR_ZERO
+};
+
+enum ret_flag {
+  RET_NORMAL,
+  RET_TRULY_CONDITIONAL,
 };
 
 enum main_opcodes {
@@ -587,6 +593,8 @@ static void stack_push(struct libyagbe_cpu* const cpu,
   assert(cpu != NULL);
   assert(bus != NULL);
 
+  libyagbe_sched_step();
+
   libyagbe_bus_write_memory(bus, --cpu->reg.sp, hi);
   libyagbe_bus_write_memory(bus, --cpu->reg.sp, lo);
 }
@@ -679,6 +687,8 @@ static void alu_add_hl(struct libyagbe_cpu* const cpu, const uint16_t pair) {
 
   cpu->reg.af.byte.lo = set_carry_flag(cpu->reg.af.byte.lo, sum > 0xFFFF);
   cpu->reg.hl.value = (uint16_t)sum;
+
+  libyagbe_sched_step();
 }
 
 static uint8_t alu_rr(struct libyagbe_cpu* const cpu, uint8_t reg,
@@ -822,6 +832,7 @@ static void jr_if(struct libyagbe_bus* const bus,
   imm = (int8_t)read_imm8(cpu, bus);
 
   if (condition_met) {
+    libyagbe_sched_step();
     cpu->reg.pc += imm;
   }
 }
@@ -836,6 +847,7 @@ static void jp_if(struct libyagbe_cpu* const cpu,
   address = read_imm16(cpu, bus);
 
   if (condition_met) {
+    libyagbe_sched_step();
     cpu->reg.pc = address;
   }
 }
@@ -855,12 +867,18 @@ static uint16_t stack_pop(struct libyagbe_cpu* const cpu,
 }
 
 static void ret_if(struct libyagbe_cpu* const cpu,
-                   struct libyagbe_bus* const bus, const bool condition_met) {
+                   struct libyagbe_bus* const bus, const bool condition_met,
+                   const enum ret_flag flag) {
   assert(bus != NULL);
   assert(cpu != NULL);
 
+  if (flag == RET_TRULY_CONDITIONAL) {
+    libyagbe_sched_step();
+  }
+
   if (condition_met) {
     cpu->reg.pc = stack_pop(cpu, bus);
+    libyagbe_sched_step();
   }
 }
 
@@ -973,6 +991,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_INC_BC:
       cpu->reg.bc.value++;
+      libyagbe_sched_step();
+
       return;
 
     case OP_LD_MEM_BC_A:
@@ -1014,6 +1034,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_DEC_BC:
       cpu->reg.bc.value--;
+      libyagbe_sched_step();
+
       return;
 
     case OP_INC_C:
@@ -1042,6 +1064,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_INC_DE:
       cpu->reg.de.value++;
+      libyagbe_sched_step();
+
       return;
 
     case OP_INC_D:
@@ -1074,6 +1098,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_DEC_DE:
       cpu->reg.de.value--;
+      libyagbe_sched_step();
+
       return;
 
     case OP_INC_E:
@@ -1106,6 +1132,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_INC_HL:
       cpu->reg.hl.value++;
+      libyagbe_sched_step();
+
       return;
 
     case OP_INC_H:
@@ -1131,7 +1159,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
           cpu->reg.af.byte.lo |= FLAG_C;
         }
 
-        if ((cpu->reg.af.byte.lo & FLAG_H) || (cpu->reg.af.byte.hi & 0x0F) > 0x09) {
+        if ((cpu->reg.af.byte.lo & FLAG_H) ||
+            (cpu->reg.af.byte.hi & 0x0F) > 0x09) {
           cpu->reg.af.byte.hi += 0x06;
         }
       } else {
@@ -1164,6 +1193,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_DEC_HL:
       cpu->reg.hl.value--;
+      libyagbe_sched_step();
+
       return;
 
     case OP_INC_L:
@@ -1199,6 +1230,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_INC_SP:
       cpu->reg.sp++;
+      libyagbe_sched_step();
+
       return;
 
     case OP_INC_MEM_HL: {
@@ -1245,6 +1278,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_DEC_SP:
       cpu->reg.sp--;
+      libyagbe_sched_step();
+
       return;
 
     case OP_INC_A:
@@ -1474,6 +1509,9 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
     case OP_LD_MEM_HL_L:
       libyagbe_bus_write_memory(bus, cpu->reg.hl.value, cpu->reg.hl.byte.lo);
+      return;
+
+    case OP_HALT:
       return;
 
     case OP_LD_MEM_HL_A:
@@ -1836,7 +1874,7 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       return;
 
     case OP_RET_NZ:
-      ret_if(cpu, bus, !(cpu->reg.af.byte.lo & FLAG_Z));
+      ret_if(cpu, bus, !(cpu->reg.af.byte.lo & FLAG_Z), RET_TRULY_CONDITIONAL);
       return;
 
     case OP_POP_BC:
@@ -1871,11 +1909,12 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       return;
 
     case OP_RET_Z:
-      ret_if(cpu, bus, (cpu->reg.af.byte.lo & FLAG_Z) != 0);
+      ret_if(cpu, bus, (cpu->reg.af.byte.lo & FLAG_Z) != 0,
+             RET_TRULY_CONDITIONAL);
       return;
 
     case OP_RET:
-      ret_if(cpu, bus, true);
+      ret_if(cpu, bus, true, RET_NORMAL);
       return;
 
     case OP_JP_Z_IMM16:
@@ -3134,7 +3173,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         return;
 
       case OP_RET_NC:
-        ret_if(cpu, bus, !(cpu->reg.af.byte.lo & FLAG_C));
+        ret_if(cpu, bus, !(cpu->reg.af.byte.lo & FLAG_C),
+               RET_TRULY_CONDITIONAL);
         return;
 
       case OP_CALL_NC_IMM16:
@@ -3165,11 +3205,12 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         return;
 
       case OP_RET_C:
-        ret_if(cpu, bus, (cpu->reg.af.byte.lo & FLAG_C) != 0);
+        ret_if(cpu, bus, (cpu->reg.af.byte.lo & FLAG_C) != 0,
+               RET_TRULY_CONDITIONAL);
         return;
 
       case OP_RETI:
-        ret_if(cpu, bus, true);
+        ret_if(cpu, bus, true, RET_NORMAL);
         return;
 
       case OP_JP_C_IMM16:
@@ -3238,6 +3279,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
         cpu->reg.af.byte.lo =
             set_carry_flag(cpu->reg.af.byte.lo, (result & 0x100) != 0);
+
+        libyagbe_sched_step();
 
         cpu->reg.sp = sum;
         return;
@@ -3319,11 +3362,15 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
             set_carry_flag(cpu->reg.af.byte.lo, (result & 0x100) != 0);
 
         cpu->reg.hl.value = sum;
+        libyagbe_sched_step();
+
         return;
       }
 
       case OP_LD_SP_HL:
         cpu->reg.sp = cpu->reg.hl.value;
+        libyagbe_sched_step();
+
         return;
 
       case OP_LD_A_MEM_IMM16: {
@@ -3332,6 +3379,9 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         cpu->reg.af.byte.hi = libyagbe_bus_read_memory(bus, imm16);
         return;
       }
+
+      case OP_EI:
+        return;
 
       case OP_CP_IMM8: {
         const uint8_t imm8 = read_imm8(cpu, bus);
@@ -3348,5 +3398,5 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         break;
     }
   }
-  /*__debugbreak(); */
+  __debugbreak(); 
 }

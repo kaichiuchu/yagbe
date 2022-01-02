@@ -28,7 +28,7 @@ extern "C" {
 /* Conditionally sets a bit or clears one without branching. */
 #define SET_BIT_IF(n, bit_mask, condition) n = (n & ~bit_mask) | (-(condition) & bit_mask)
 
-#define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
+#define SWAP(x, y, T) do { T TEMP = x; x = y; y = TEMP; } while (0)
 
 #ifdef __cplusplus
 }

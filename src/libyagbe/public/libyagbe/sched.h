@@ -19,15 +19,19 @@
 #ifndef LIBYAGBE_SCHED_H
 #define LIBYAGBE_SCHED_H
 
+/** @brief Defines the function prototype used to handle events. */
 typedef void (*libyagbe_sched_event_cb)(void* const userdata);
 
 struct libyagbe_sched_event {
   /** @brief When should this event be triggered? */
   unsigned int expiry_time;
 
-  /** What function should be called when the event has expired? */
+  /** @brief What function should be called when the event has expired? */
   libyagbe_sched_event_cb cb_func;
 
+  /** @brief What context specific data, if any, should be passed to the
+    * function?
+   */
   void* userdata;
 };
 

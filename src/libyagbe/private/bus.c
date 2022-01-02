@@ -17,12 +17,12 @@
  */
 
 #include "libyagbe/bus.h"
-#include "libyagbe/compat/compat_stdbool.h"
 
 #include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 
+#include "libyagbe/compat/compat_stdbool.h"
 #include "libyagbe/sched.h"
 
 uint8_t libyagbe_bus_read_memory(struct libyagbe_bus* const bus,
@@ -50,6 +50,19 @@ uint8_t libyagbe_bus_read_memory(struct libyagbe_bus* const bus,
       switch ((address >> 8) & 0x0F) {
         case 0xF:
           switch ((address & 0x00FF) >> 4) {
+            case 0x0:
+              switch (address & 0x000F) {
+                case LIBYAGBE_TIMER_IO_TIMA:
+                  return bus->timer.tima;
+
+                case LIBYAGBE_BUS_IO_IF:
+                  return bus->interrupt_flag;
+
+                default:
+                  break;
+              }
+              break;
+
             case 0x4:
               switch (address & 0x000F) {
                 case LIBYAGBE_PPU_IO_LY:
@@ -86,6 +99,9 @@ uint8_t libyagbe_bus_read_memory(struct libyagbe_bus* const bus,
                 case 0xD:
                 case 0xE:
                   return bus->hram[address - 0xFF80];
+
+                case 0xF:
+                  return bus->interrupt_enable;
 
                 default:
                   break;
@@ -138,6 +154,14 @@ void libyagbe_bus_write_memory(struct libyagbe_bus* const bus,
                   break;
 
                 case 2:
+                  break;
+
+                case LIBYAGBE_TIMER_IO_TIMA:
+                  bus->timer.tima = data;
+                  break;
+
+                case LIBYAGBE_TIMER_IO_TMA:
+                  bus->timer.tma = data;
                   break;
 
                 case LIBYAGBE_TIMER_IO_TAC:

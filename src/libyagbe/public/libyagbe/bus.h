@@ -24,7 +24,9 @@
 #include "ppu.h"
 #include "timer.h"
 
+/** @brief Defines the maximum number of elements of various RAM areas. */
 enum libyagbe_bus_memory_size {
+  /** @brief The WRAM size counts both banks. */
   LIBYAGBE_BUS_MEM_SIZE_WRAM = 8192,
   LIBYAGBE_BUS_MEM_SIZE_HRAM = 128
 };
@@ -55,7 +57,10 @@ struct libyagbe_bus {
   uint8_t interrupt_enable;
 };
 
-/** Reads a byte from the system bus.
+uint8_t libyagbe_bus_inspect_memory(struct libyagbe_bus* const bus,
+                                    const uint16_t address);
+
+/** Reads a byte from the system bus, advancing the system by 1 m-cycle.
  *
  * @param bus The current system bus.
  * @param address The address to read from the system bus.
@@ -65,7 +70,7 @@ struct libyagbe_bus {
 uint8_t libyagbe_bus_read_memory(struct libyagbe_bus* const bus,
                                  const uint16_t address);
 
-/** Writes a byte to the system bus.
+/** Writes a byte to the system bus, advancing the system by 1 m-cycle.
  *
  * @param bus The current system bus.
  * @param address The address to write to.
