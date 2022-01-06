@@ -55,9 +55,8 @@ struct libyagbe_cpu {
     cpu_register_pair bc;
     cpu_register_pair de;
     cpu_register_pair hl;
-
-    uint16_t pc;
-    uint16_t sp;
+    cpu_register_pair pc;
+    cpu_register_pair sp;
   } reg;
 
   /** The current instruction being processed. */

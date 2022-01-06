@@ -56,6 +56,7 @@ struct disasm_data {
   int flags;
 };
 
+#if 0
 static const struct disasm_data main_opcodes[256] = {
     {"NOP", OP_NONE, REG_UNUSED},             /* 0x00 */
     {"LD BC, $%04X", OP_IMM16, REG_BC},       /* 0x01 */
@@ -574,11 +575,6 @@ static const struct disasm_data cb_opcodes[256] = {
     {"SET 7, A", OP_NONE, REG_A | REG_F}          /* 0xFF */
 };
 
-static struct current_disasm {
-  char disasm_result[256];
-  int post_op_flags;
-} current_disasm;
-
 static uint8_t inspect_memory(struct libyagbe_bus* const bus,
                               const uint16_t address) {
   assert(bus != NULL);
@@ -660,10 +656,41 @@ static uint8_t inspect_memory(struct libyagbe_bus* const bus,
   printf("Unhandled read: $%04X\n", address);
   return 0xFF;
 }
+#endif
 
+static struct current_disasm { char disasm_result[256]; } current_disasm;
+
+void libyagbe_disasm_prepare(const uint16_t pc, struct libyagbe_cpu* const cpu,
+                             struct libyagbe_bus* const bus) {
+  assert(bus != NULL);
+
+  memset(current_disasm.disasm_result, 0, sizeof(current_disasm.disasm_result));
+
+  sprintf(current_disasm.disasm_result,
+          "BC=%04X DE=%04X HL=%04X AF=%04X SP=%04X PC=%04X", cpu->reg.bc.value,
+          cpu->reg.de.value, cpu->reg.hl.value, cpu->reg.af.value,
+          cpu->reg.sp.value, pc);
+}
+
+char* libyagbe_disasm_execute(struct libyagbe_cpu* const cpu,
+                              struct libyagbe_bus* const bus) {
+  char buf[256];
+
+  assert(cpu != NULL);
+  assert(bus != NULL);
+
+  sprintf(buf, "   TIMA=%02X TMA=%02X TAC=%02X", bus->timer.tima,
+          bus->timer.tma, bus->timer.tac);
+
+  strcat(current_disasm.disasm_result, buf);
+  return current_disasm.disasm_result;
+}
+
+#if 0
 void libyagbe_disasm_prepare(const uint16_t pc,
                              struct libyagbe_bus* const bus) {
   uint8_t instruction;
+
   const struct disasm_data* data;
 
   assert(bus != NULL);
@@ -712,9 +739,13 @@ void libyagbe_disasm_prepare(const uint16_t pc,
 char* libyagbe_disasm_execute(struct libyagbe_cpu* const cpu,
                               struct libyagbe_bus* const bus) {
   int bit_counter;
+  char buf[256];
 
   assert(cpu != NULL);
   assert(bus != NULL);
+
+  sprintf(buf, "         ; TIMA=$%02X, TAC=$%02X, TMA=$%02X, ", bus->timer.tima, bus->timer.tac, bus->timer.tma);
+  strcat(current_disasm.disasm_result, buf);
 
   if (current_disasm.post_op_flags == REG_UNUSED) {
     /* No post instruction execution disassembly has to take place. We're
@@ -723,11 +754,9 @@ char* libyagbe_disasm_execute(struct libyagbe_cpu* const cpu,
     return current_disasm.disasm_result;
   }
 
-  strcat(current_disasm.disasm_result, "          ; ");
-
   for (bit_counter = 0; bit_counter != 15; ++bit_counter) {
     const int counter = (1 << bit_counter);
-    char buf[64];
+    char buf[256];
 
     if (counter & current_disasm.post_op_flags) {
       switch (counter) {
@@ -802,3 +831,4 @@ char* libyagbe_disasm_execute(struct libyagbe_cpu* const cpu,
   }
   return current_disasm.disasm_result;
 }
+#endif

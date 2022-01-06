@@ -60,6 +60,7 @@ int main(int argc, char* argv[]) {
   struct libyagbe_system gb;
 
   char* disasm;
+  FILE* trace_file;
 
   if (argc < 2) {
     fprintf(stderr, "%s: missing required argument.\n", argv[0]);
@@ -71,19 +72,22 @@ int main(int argc, char* argv[]) {
   rom_data = open_rom(argv[1]);
   libyagbe_system_init(&gb, rom_data);
 
-  for (;;) {
-    const uint16_t pc = gb.cpu.reg.pc;
+  trace_file = fopen("trace.txt", "w");
 
-    libyagbe_disasm_prepare(gb.cpu.reg.pc, &gb.bus);
+  for (;;) {
+    libyagbe_disasm_prepare(gb.cpu.reg.pc.value, &gb.cpu, &gb.bus);
 
     if (libyagbe_system_step(&gb) == 0) {
       disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
-      printf("$%04X: %s\n", pc, disasm);
+      fprintf(trace_file, "%s\n", disasm);
+
+      fflush(trace_file);
+      fclose(trace_file);
 
       return EXIT_FAILURE;
     }
 
     disasm = libyagbe_disasm_execute(&gb.cpu, &gb.bus);
-    printf("$%04X: %s\n", pc, disasm);
+    fprintf(trace_file, "%s\n", disasm);
   }
 }

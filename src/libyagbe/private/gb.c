@@ -17,10 +17,11 @@
  */
 
 #include "libyagbe/gb.h"
-#include "libyagbe/sched.h"
 
 #include <assert.h>
 #include <stddef.h>
+
+#include "libyagbe/sched.h"
 
 void libyagbe_system_init(struct libyagbe_system* const gb,
                           const uint8_t* const cart_data) {
@@ -35,12 +36,13 @@ void libyagbe_system_init(struct libyagbe_system* const gb,
 void libyagbe_system_reset(struct libyagbe_system* const gb) {
   assert(gb != NULL);
   libyagbe_sched_reset();
+  libyagbe_timer_reset(&gb->bus.timer);
   libyagbe_cpu_reset(&gb->cpu);
 }
 
 unsigned int libyagbe_system_step(struct libyagbe_system* const gb) {
   assert(gb != NULL);
   libyagbe_cpu_step(&gb->cpu, &gb->bus);
-  
+
   return 1;
 }

@@ -39,6 +39,8 @@ struct libyagbe_timer {
 
 void libyagbe_timer_set_interrupt_flag(uint8_t* const interrupt_flag);
 
+void libyagbe_timer_reset(struct libyagbe_timer* const timer);
+
 void libyagbe_timer_handle_tac(struct libyagbe_timer* const timer,
                                const uint8_t tac);
 

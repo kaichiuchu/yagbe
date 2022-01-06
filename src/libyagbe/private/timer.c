@@ -55,6 +55,14 @@ void libyagbe_timer_set_interrupt_flag(uint8_t* const iflag) {
   interrupt_flag = iflag;
 }
 
+void libyagbe_timer_reset(struct libyagbe_timer* const timer) {
+  assert(timer != NULL);
+
+  timer->tac = 0xF8;
+  timer->tima = 0x00;
+  timer->tma = 0x00;
+}
+
 void libyagbe_timer_handle_tac(struct libyagbe_timer* const timer,
                                const uint8_t tac) {
   assert(timer != NULL);
@@ -70,7 +78,7 @@ void libyagbe_timer_handle_tac(struct libyagbe_timer* const timer,
     event.userdata = timer;
 
     libyagbe_sched_insert(&event);
-    timer->tac = tac;
+    timer->tac = (timer->tac & ~0x07) | (tac & 0x07);
 
     return;
   }
@@ -79,8 +87,8 @@ void libyagbe_timer_handle_tac(struct libyagbe_timer* const timer,
   if ((timer->tac & TAC_ENABLED) && !(tac & TAC_ENABLED)) {
     /* Delete all events related to the timer. */
     /*libyagbe_sched_delete_events(timer);*/
-    timer->tac = tac;
+    timer->tac = (timer->tac & ~0x07) | (tac & 0x07);
     return;
   }
-  timer->tac = tac;
+  timer->tac = (timer->tac & ~0x07) | (tac & 0x07);
 }

@@ -31,7 +31,8 @@ extern "C" {
 
 /** Prepares to disassemble the current instruction.
  */
-void libyagbe_disasm_prepare(const uint16_t pc, struct libyagbe_bus* const bus);
+void libyagbe_disasm_prepare(const uint16_t pc, struct libyagbe_cpu* const cpu,
+                             struct libyagbe_bus* const bus);
 
 /**
  * Disassembles a given instruction.

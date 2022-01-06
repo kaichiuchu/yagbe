@@ -74,10 +74,7 @@ enum alu_flag {
   ALU_CLEAR_ZERO
 };
 
-enum ret_flag {
-  RET_NORMAL,
-  RET_TRULY_CONDITIONAL,
-};
+enum ret_flag { RET_NORMAL, RET_TRULY_CONDITIONAL };
 
 enum main_opcodes {
   OP_NOP = 0x00,
@@ -595,8 +592,8 @@ static void stack_push(struct libyagbe_cpu* const cpu,
 
   libyagbe_sched_step();
 
-  libyagbe_bus_write_memory(bus, --cpu->reg.sp, hi);
-  libyagbe_bus_write_memory(bus, --cpu->reg.sp, lo);
+  libyagbe_bus_write_memory(bus, --cpu->reg.sp.value, hi);
+  libyagbe_bus_write_memory(bus, --cpu->reg.sp.value, lo);
 }
 
 /* @brief Reads the immediate byte referenced by the program counter, then
@@ -612,7 +609,7 @@ static uint8_t read_imm8(struct libyagbe_cpu* const cpu,
   assert(cpu != NULL);
   assert(bus != NULL);
 
-  return libyagbe_bus_read_memory(bus, cpu->reg.pc++);
+  return libyagbe_bus_read_memory(bus, cpu->reg.pc.value++);
 }
 
 /* @brief Reads the next two bytes from memory referenced by the program
@@ -817,8 +814,8 @@ static void call_if(struct libyagbe_cpu* const cpu,
   address = read_imm16(cpu, bus);
 
   if (condition_met) {
-    stack_push(cpu, bus, cpu->reg.pc >> 8, cpu->reg.pc & 0x00FF);
-    cpu->reg.pc = address;
+    stack_push(cpu, bus, cpu->reg.pc.byte.hi, cpu->reg.pc.byte.lo);
+    cpu->reg.pc.value = address;
   }
 }
 
@@ -833,7 +830,7 @@ static void jr_if(struct libyagbe_bus* const bus,
 
   if (condition_met) {
     libyagbe_sched_step();
-    cpu->reg.pc += imm;
+    cpu->reg.pc.value += imm;
   }
 }
 
@@ -848,7 +845,7 @@ static void jp_if(struct libyagbe_cpu* const cpu,
 
   if (condition_met) {
     libyagbe_sched_step();
-    cpu->reg.pc = address;
+    cpu->reg.pc.value = address;
   }
 }
 
@@ -860,8 +857,8 @@ static uint16_t stack_pop(struct libyagbe_cpu* const cpu,
   assert(cpu != NULL);
   assert(bus != NULL);
 
-  lo = libyagbe_bus_read_memory(bus, cpu->reg.sp++);
-  hi = libyagbe_bus_read_memory(bus, cpu->reg.sp++);
+  lo = libyagbe_bus_read_memory(bus, cpu->reg.sp.value++);
+  hi = libyagbe_bus_read_memory(bus, cpu->reg.sp.value++);
 
   return (uint16_t)((hi << 8) | lo);
 }
@@ -877,9 +874,12 @@ static void ret_if(struct libyagbe_cpu* const cpu,
   }
 
   if (condition_met) {
-    cpu->reg.pc = stack_pop(cpu, bus);
+    cpu->reg.pc.value = stack_pop(cpu, bus);
     libyagbe_sched_step();
+
+    return;
   }
+  libyagbe_sched_step();
 }
 
 static void rst(struct libyagbe_cpu* const cpu, struct libyagbe_bus* const bus,
@@ -887,8 +887,8 @@ static void rst(struct libyagbe_cpu* const cpu, struct libyagbe_bus* const bus,
   assert(bus != NULL);
   assert(cpu != NULL);
 
-  stack_push(cpu, bus, cpu->reg.pc >> 8, cpu->reg.pc & 0x00FF);
-  cpu->reg.pc = address;
+  stack_push(cpu, bus, cpu->reg.pc.byte.hi, cpu->reg.pc.byte.lo);
+  cpu->reg.pc.value = address;
 }
 
 static uint8_t alu_rlc(struct libyagbe_cpu* const cpu, uint8_t n,
@@ -970,8 +970,8 @@ void libyagbe_cpu_reset(struct libyagbe_cpu* const cpu) {
   cpu->reg.de.value = 0x00D8;
   cpu->reg.hl.value = 0x014D;
 
-  cpu->reg.sp = 0xFFFE;
-  cpu->reg.pc = 0x0100;
+  cpu->reg.sp.value = 0xFFFE;
+  cpu->reg.pc.value = 0x0100;
 }
 
 void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
@@ -1018,8 +1018,8 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
     case OP_LD_MEM_IMM16_SP: {
       const uint16_t imm16 = read_imm16(cpu, bus);
 
-      libyagbe_bus_write_memory(bus, imm16, cpu->reg.sp & 0x00FF);
-      libyagbe_bus_write_memory(bus, imm16 + 1, cpu->reg.sp >> 8);
+      libyagbe_bus_write_memory(bus, imm16, cpu->reg.sp.byte.lo);
+      libyagbe_bus_write_memory(bus, imm16 + 1, cpu->reg.sp.byte.hi);
 
       return;
     }
@@ -1221,7 +1221,7 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       return;
 
     case OP_LD_SP_IMM16:
-      cpu->reg.sp = read_imm16(cpu, bus);
+      cpu->reg.sp.value = read_imm16(cpu, bus);
       return;
 
     case OP_LDD_HL_A:
@@ -1229,7 +1229,7 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       return;
 
     case OP_INC_SP:
-      cpu->reg.sp++;
+      cpu->reg.sp.value++;
       libyagbe_sched_step();
 
       return;
@@ -1269,7 +1269,7 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       return;
 
     case OP_ADD_HL_SP:
-      alu_add_hl(cpu, cpu->reg.sp);
+      alu_add_hl(cpu, cpu->reg.sp.value);
       return;
 
     case OP_LDD_A_HL:
@@ -1277,7 +1277,7 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       return;
 
     case OP_DEC_SP:
-      cpu->reg.sp--;
+      cpu->reg.sp.value--;
       libyagbe_sched_step();
 
       return;
@@ -3267,9 +3267,9 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
       case OP_ADD_SP_SIMM8: {
         const int8_t simm8 = (int8_t)read_imm8(cpu, bus);
-        const uint16_t sum = (uint16_t)(cpu->reg.sp + simm8);
+        const uint16_t sum = (uint16_t)(cpu->reg.sp.value + simm8);
 
-        const int result = cpu->reg.sp ^ simm8 ^ sum;
+        const int result = cpu->reg.sp.value ^ simm8 ^ sum;
 
         cpu->reg.af.byte.lo &= ~FLAG_Z;
         cpu->reg.af.byte.lo &= ~FLAG_N;
@@ -3282,12 +3282,12 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
         libyagbe_sched_step();
 
-        cpu->reg.sp = sum;
+        cpu->reg.sp.value = sum;
         return;
       }
 
       case OP_JP_HL:
-        cpu->reg.pc = cpu->reg.hl.value;
+        cpu->reg.pc.value = cpu->reg.hl.value;
         return;
 
       case OP_LD_MEM_IMM16_A: {
@@ -3348,9 +3348,9 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
 
       case OP_LD_HL_SP_SIMM8: {
         const int8_t simm8 = (int8_t)read_imm8(cpu, bus);
-        const uint16_t sum = (uint16_t)(cpu->reg.sp + simm8);
+        const uint16_t sum = (uint16_t)(cpu->reg.sp.value + simm8);
 
-        const int result = cpu->reg.sp ^ simm8 ^ sum;
+        const int result = cpu->reg.sp.value ^ simm8 ^ sum;
 
         cpu->reg.af.byte.lo &= ~FLAG_Z;
         cpu->reg.af.byte.lo &= ~FLAG_N;
@@ -3368,7 +3368,7 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
       }
 
       case OP_LD_SP_HL:
-        cpu->reg.sp = cpu->reg.hl.value;
+        cpu->reg.sp.value = cpu->reg.hl.value;
         libyagbe_sched_step();
 
         return;
@@ -3398,5 +3398,5 @@ void libyagbe_cpu_step(struct libyagbe_cpu* const cpu,
         break;
     }
   }
-  __debugbreak(); 
+  /*__debugbreak();  */
 }
